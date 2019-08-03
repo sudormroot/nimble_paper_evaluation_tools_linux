@@ -9,13 +9,13 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <errno.h>
-#include <inttypes.h>
+//#include <inttypes.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-
+//#include <fcntl.h>
+//#include <sys/mman.h>
+#include <sched.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -23,7 +23,7 @@
 //#include <x86intrin.h>
 
 #include <numa.h>
-
+#include <numaif.h>
 
 #define MAX_MEM_SIZE	(1024) 
 #define ALIGN_SIZE		64
@@ -123,10 +123,12 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 	struct bitmask *cpu_mask = NULL;
 	struct bitmask *mem_mask = NULL;
 
-	volatile uint64_t t1, t2, msl, hsl, osl;
+	volatile uint64_t t1, t2, ms1, hs1, os1;
 	volatile register unsigned long x = 0;
 
 	volatile double freq = 0;
+
+	int i;
 
 	nr_nodes = numa_max_node() + 1;
 
@@ -156,6 +158,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 	numa_bitmask_setbit(cpu_mask, cpu_node);
 
+		//numa_sched_setaffinity
 	if (sched_setaffinity(pid, numa_bitmask_nbytes(cpu_mask), (cpu_set_t*)cpu_mask->maskp) < 0) {
 		perror("sched_setaffinity() failed");
 		exit(-1);
@@ -194,7 +197,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 	ptr = numa_alloc_onnode(size, mem_node);
 
 	if(ptr == NULL) {
-		perror("numa_alloc_onnode() at node #%d failed\n", mem_node);
+		perror("numa_alloc_onnode() failed\n");
 		exit(-1);
 	}
 	
@@ -239,7 +242,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 		compiler_fence();
 
-		msl = t2 - t1;
+		ms1 = t2 - t1;
 
 		compiler_fence();
 		
@@ -260,9 +263,9 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		lfence();
 
 		compiler_fence();
-		hsl = t2 - t1;
+		hs1 = t2 - t1;
 
-		printf( "Memory hit latency: %lu cycles %.2f ns\n", hsl, cycles_to_nsecs(hs1, freq));
+		printf( "Memory hit latency: %lu cycles %.2f ns\n", hs1, cycles_to_nsecs(hs1, freq));
 
 
 		mfence();  
@@ -272,14 +275,14 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		lfence(); 
 		t2 = rdtsc();
 		lfence();  
-		osl = t2 - t1;
+		os1 = t2 - t1;
 
-		printf( "Overhead latency: %lu cycles %.2f ns\n", osl, cycles_to_nsecs(os1, freq)); 
+		printf( "Overhead latency: %lu cycles %.2f ns\n", os1, cycles_to_nsecs(os1, freq)); 
 
 
-		printf( "Measured L1 hit latency: %lu cycles, %.2f ns\n", hsl - osl, cycles_to_nsecs(hs1 - os1, freq)); 
+		printf( "Measured L1 hit latency: %lu cycles %.2f ns\n", hs1 - os1, cycles_to_nsecs(hs1 - os1, freq)); 
 
-		printf( "Measured main memory latency: %lu cycles\n", msl - osl, cycles_to_nsecs(ms1 - os1, freq)); 
+		printf( "Measured main memory latency: %lu cycles %.2f ns\n", ms1 - os1, cycles_to_nsecs(ms1 - os1, freq)); 
 
 		aligned_ptr += sizeof(unsigned long);
 	}
@@ -287,8 +290,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 	numa_free_nodemask(cpu_node);
 	numa_free_nodemask(mem_node);
 	
-	numa_free(ptr0, size);
-	numa_free(ptr1, size);
+	numa_free(ptr, size);
 }
 
 int main(int argc, char **argv)
