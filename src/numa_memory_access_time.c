@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -15,9 +16,11 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#include <immintrin.h>
-#include <stdint.h>
-#include <x86intrin.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
+//#include <immintrin.h>
+//#include <x86intrin.h>
 
 #include <numa.h>
 
@@ -25,7 +28,10 @@
 #define MAX_MEM_SIZE	(1024) 
 #define ALIGN_SIZE		64
 
-
+inline double cycles_to_nsecs(double cycles, double freq)
+{
+	return (cycles / freq) * 1000000000.00f;
+}
 
 inline void mfence(void)
 {
@@ -206,65 +212,74 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 		printf("aligned_ptr=%p\n", aligned_ptr);
 
-		_mm_mfence();
+		mfence();
 
-		_mm_clflush(aligned_ptr);
+		clflush(aligned_ptr);
 
-		_mm_mfence();  //orderize _mm_clflush
+		mfence();  //serialize clflush
+		//lfence();                      
+		
+		compiler_fence();
 
+		t1 = rdtsc();                    
 
-		_mm_mfence();                      /* this properly orders both clflush and rdtscp*/
-		_mm_lfence();                      /* mfence and lfence must be in this order + compiler barrier for rdtscp */
-		t1 = __rdtsc();                    /* set timer */
-		_mm_lfence();                      /* serialize __rdtscp with respect to trailing instructions + compiler barrier for rdtscp and the load */
-		x = *((unsigned long *)aligned_ptr);             /* array[0] is a cache miss */
-		/* measring the write miss latency to array is not meaningful because it's an implementation detail and the next write may also miss */
-		/* no need for mfence because there are no stores in between */
-		_mm_lfence();                      /* mfence and lfence must be in this order + compiler barrier for rdtscp and the load*/
-		t2 = __rdtsc();
-		_mm_lfence();                      /* serialize __rdtscp with respect to trailing instructions */
+		mfence();                      
+
+		compiler_fence();
+
+		x = *((unsigned long *)aligned_ptr);             
+
+		lfence();        
+		
+		compiler_fence();
+
+		t2 = rdtsc();
+		
+		lfence();                      
+
+		compiler_fence();
+
 		msl = t2 - t1;
 
-		asm volatile("": : :"memory");
-
-		//printf( "x = %x \n", x);             /* prevent the compiler from optimizing the load */
+		compiler_fence();
+		
 		x++;
 
-		//printf( "miss section latency = %lu \n", msl );   /* the latency of everything in between the two rdtscp */
+		mfence();  
+		lfence();  
+		
+		t1 = rdtsc();
+		
+		lfence(); 
+		compiler_fence();
 
-		_mm_mfence();                      /* this properly orders both clflush and rdtscp*/
-		_mm_lfence();                      /* mfence and lfence must be in this order + compiler barrier for rdtscp */
-		t1 = __rdtsc();                 /* set timer */
-		_mm_lfence();                      /* serialize __rdtscp with respect to trailing instructions + compiler barrier for rdtscp and the load */
-		//temp = array[ 0 ];                 /* array[0] is a cache miss */
 		x = *((unsigned long *)aligned_ptr);
 
-		/* measring the write miss latency to array is not meaningful because it's an implementation detail and the next write may also miss */
-		/* no need for mfence because there are no stores in between */
-		_mm_lfence();                      /* mfence and lfence must be in this order + compiler barrier for rdtscp and the load */
-		t2 = __rdtsc();
-		_mm_lfence();                      /* serialize __rdtscp with respect to trailing instructions */
+		lfence();  
+		t2 = rdtsc();
+		lfence();
+
+		compiler_fence();
 		hsl = t2 - t1;
 
-		printf( "x = %x \n", x);            /* prevent the compiler from optimizing the load */
-		printf( "Memory hit latency = %lu cycles\n", hsl );   /* the latency of everything in between the two rdtscp */
+		printf( "Memory hit latency: %lu cycles %.2f ns\n", hsl, cycles_to_nsecs(hs1, freq));
 
 
-		_mm_mfence();                      /* this properly orders both clflush and rdtscp*/
-		_mm_lfence();                      /* mfence and lfence must be in this order + compiler barrier for rdtscp */
-		t1 = __rdtsc();                 /* set timer */
-		_mm_lfence();                      /* serialize __rdtscp with respect to trailing instructions + compiler barrier for rdtscp */
-		/* no need for mfence because there are no stores in between */
-		_mm_lfence();                      /* mfence and lfence must be in this order + compiler barrier for rdtscp */
-		t2 = __rdtsc();
-		_mm_lfence();                      /* serialize __rdtscp with respect to trailing instructions */
+		mfence();  
+		lfence();  
+		t1 = rdtsc(); 
+		lfence();  
+		lfence(); 
+		t2 = rdtsc();
+		lfence();  
 		osl = t2 - t1;
 
-		printf( "overhead latency = %lu \n", osl ); /* the latency of everything in between the two rdtscp */
+		printf( "Overhead latency: %lu cycles %.2f ns\n", osl, cycles_to_nsecs(os1, freq)); 
 
 
-		printf( "Measured L1 hit latency = %lu TSC cycles\n", hsl - osl ); /* hsl is always larger than osl */
-		printf( "Measured main memory latency = %lu TSC cycles\n", msl - osl ); /* msl is always larger than osl and hsl */
+		printf( "Measured L1 hit latency: %lu cycles, %.2f ns\n", hsl - osl, cycles_to_nsecs(hs1 - os1, freq)); 
+
+		printf( "Measured main memory latency: %lu cycles\n", msl - osl, cycles_to_nsecs(ms1 - os1, freq)); 
 
 		aligned_ptr += sizeof(unsigned long);
 	}
@@ -278,7 +293,10 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 int main(int argc, char **argv)
 {
-	setbuf(stdout, NULL);
+
+	if(nice(-20)) {
+		perror("Warning, failed in nice().\n");
+	}
 
 	calculate_memory_access_time(0, 0);
 	calculate_memory_access_time(0, 1);
