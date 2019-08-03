@@ -29,6 +29,13 @@ sudo echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control
 sudo echo "$MAXMEM_SIZE_LIMIT" > /sys/fs/cgroup/$CGROUP/memory.max
 echo "MAXMEM_SIZE_LIMIT=$MAXMEM_SIZE_LIMIT"
 
+#############################################
+#   Add current process to cgroup           #
+#############################################
+
+
+pid=$$
+echo "$pid" > /sys/fs/cgroup/two-level-memory/cgroup.procs
 
 #############################################
 #   Use memhog to slow NUMA node #1         #
@@ -36,23 +43,30 @@ echo "MAXMEM_SIZE_LIMIT=$MAXMEM_SIZE_LIMIT"
 
 echo "Inject traffic to slow memory on NUMA node #1 ..."
 
-memhog_pids=""
-i=0
-
-while [ $i -lt $MEMHOG_NR ];do
-	
-done
+numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=512M --band-width=0.5 #occupy 50%
 
 
 #############################################
 #   Use memhog to slow NUMA node #1         #
 #############################################
-pid=$$
 
-# 1GB in numa node #0
-sudo echo "1G" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:0
-echo "Current PID is $pid, attach current process and children into cgroup two-level-memory ..."
+sudo sysctl vm.sysctl_enable_thp_migration=1
 
-echo "$pid" > /sys/fs/cgroup/two-level-memory/cgroup.procs
+for mem in $FASTMEM_SIZE_LIMIT; do
+	
+	sudo echo "$mem""G" > /sys/fs/cgroup/two-level-memory/memory.max_at_node:0
 
+	for threads in $MAXTHREAD_NR; do
+		sudo sysctl vm/limit_mt_num=$threads
+
+		sudo sysctl vm.sysctl_enable_thp_migration=1
+		echo "mem=$mem threads=$threads ..."
+
+		exec $APP_CMD
+
+		sudo sysctl vm.sysctl_enable_thp_migration=0
+	done
+done
+
+sudo sysctl vm.sysctl_enable_thp_migration=1
 
