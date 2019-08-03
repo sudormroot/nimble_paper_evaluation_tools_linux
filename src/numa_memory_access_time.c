@@ -128,10 +128,12 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 	//
 	int real_secs = 3;
 
-	mfence();
 	compiler_fence();
+	mfence();
 
 	t1 = rdtscp(); 
+	mfence();
+
 	sleep(real_secs);
 
 	t2 = rdtscp();
@@ -154,22 +156,22 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 		mfence();  //serialize clflush
 		//lfence();                      
-		//compiler_fence();
+		compiler_fence();
 
 		//measure LOAD when cache miss
 		t1 = rdtscp();                    
 
-		lfence();                      
+		mfence();                      
 		compiler_fence();
 
 		x = *((unsigned long *)aligned_ptr);             
 
-		lfence();        
+		mfence();        
 		compiler_fence();
 
 		t2 = rdtscp();
 		
-		lfence();                      
+		mfence();                      
 		compiler_fence();
 
 		//cache miss
@@ -178,7 +180,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		mfence();
 		compiler_fence();
 			
-		printf( "Memory miss latency: %lu cycles %.2f ns\n", ms1, cycles_to_nsecs(ms1, freq));
+		//printf( "Memory miss latency: %lu cycles %.2f ns\n", ms1, cycles_to_nsecs(ms1, freq));
 
 		x++; 
 
@@ -190,17 +192,17 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		//
 		t1 = rdtscp();
 		
-		lfence(); 
+		mfence(); 
 		compiler_fence();
 
 		x = *((unsigned long *)aligned_ptr);
 
-		lfence();  
+		mfence();  
 		compiler_fence();
 
 		t2 = rdtscp();
 
-		lfence();
+		mfence();
 		compiler_fence();
 
 		//cache hit
@@ -217,17 +219,17 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		//lfence();  
 		t1 = rdtscp(); 
 
-		(void) rdtscp();
-		lfence(); 
+		//(void) rdtscp();
+		mfence(); 
 	        compiler_fence();
 
-		(void) rdtscp();
-		lfence(); 
+		//(void) rdtscp();
+		mfence(); 
 	        compiler_fence();
 
 		t2 = rdtscp();
 
-		lfence();  
+		mfence();  
 		compiler_fence();
 		os1 = t2 - t1;
 
@@ -243,7 +245,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 		aligned_ptr += sizeof(unsigned long);
 
-		break;
+		//break;
 	}
 
 	numa_free_nodemask(cpu_node);
