@@ -24,7 +24,7 @@
 #define MAX_MEM_SIZE	(32 << 20) 
 #define ALIGN_SIZE	64
 
-void calculate_memory_access_time(int cpu_node, int mem_node)
+void measure_memory_access_time(int cpu_node, int mem_node)
 {
 	int nr_nodes;
 
@@ -259,12 +259,12 @@ int main(int argc, char **argv)
 	
 	setbuf(stdout, NULL);
 
-	ndes_nr = numa_max_node();
+	nodes_nr = numa_max_node();
 
 	for(cpu_node = 0; cpu_node < nodes_nr; cpu_node++) {
 		for(mem_node = 0; mem_node < nodes_nr; mem_node++) {
 			printf("Measuring on cpu #%d mem #%d\n", cpu_node, mem_node);
-			calculate_memory_access_time(cpu_node, mem_node);
+			measure_memory_access_time(cpu_node, mem_node);
 		}
 	}
 

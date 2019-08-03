@@ -21,14 +21,20 @@
 
 #include "cpu_util.h"
 
+static double freq = 1; /*CPU freq*/
+
 int main(int argc, char **argv)
 {
-
 
 	struct bitmask *cpu_mask = NULL;
 	struct bitmask *mem_mask = NULL;
 
 	pid_t pid;
+	
+	int nodes_nr;
+
+	int cpu_node;
+	int mem_node;
 
 
 	setbuf(stdout, NULL);
