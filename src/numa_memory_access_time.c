@@ -27,7 +27,7 @@
 
 #include "cpu_util.h"
 
-#define MAX_MEM_SIZE	(128) 
+#define MAX_MEM_SIZE	(32 << 20) 
 #define ALIGN_SIZE	64
 
 void calculate_memory_access_time(int cpu_node, int mem_node)
@@ -180,7 +180,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		mfence();
 		compiler_fence();
 			
-		//printf( "Memory miss latency: %lu cycles %.2f ns\n", ms1, cycles_to_nsecs(ms1, freq));
+		printf( "Memory miss latency: %lu cycles %.2f ns\n", ms1, cycles_to_nsecs(ms1, freq));
 
 		x++; 
 
@@ -239,9 +239,9 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		printf( "Overhead latency: %lu cycles %.2f ns\n", os1, cycles_to_nsecs(os1, freq)); 
 
 
-		printf( "Cache hit latency: %lu cycles %.2f ns\n", hs1 - os1, cycles_to_nsecs(hs1 - os1, freq)); 
+		//printf( "Cache hit latency: %lu cycles %.2f ns\n", hs1 - os1, cycles_to_nsecs(hs1 - os1, freq)); 
 
-		printf( "Memory latency: %lu cycles %.2f ns\n", ms1 - os1, cycles_to_nsecs(ms1 - os1, freq)); 
+		//printf( "Memory latency: %lu cycles %.2f ns\n", ms1 - os1, cycles_to_nsecs(ms1 - os1, freq)); 
 
 		aligned_ptr += sizeof(unsigned long);
 

@@ -40,6 +40,18 @@ inline void clflush(volatile void *ptr)
 
 inline uint64_t rdtscp(void)
 {
+	volatile uint64_t tsc=0;
+
+	asm volatile	("rdtscp; "         // serializing read of tsc
+			"shl $32,%%rdx; "  // shift higher 32 bits stored in rdx up
+			"or %%rdx,%%rax"   // and or onto rax
+			: "=a"(tsc)        // output to tsc variable
+			:
+			: "%rcx", "%rdx"); // rcx and rdx are clobbered
+
+	return tsc;
+
+#if 0
     volatile unsigned  lo,hi;
 
     asm volatile
@@ -54,6 +66,7 @@ inline uint64_t rdtscp(void)
         );
 
         return (uint64_t)hi << 32 | (uint64_t)lo;
+#endif 0
 }
 
 inline double measure_cpu_freq(void)
