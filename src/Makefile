@@ -1,6 +1,6 @@
 
 CC	=	gcc
-CFLAGS	=	-O3
+CFLAGS	=	-O3 -I.
 
 numa_memory_access_time: numa_memory_access_time.c
 	$(CC) $(CFLAGS) -o numa_memory_access_time numa_memory_access_time.c -lnuma
