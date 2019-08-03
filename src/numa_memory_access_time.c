@@ -52,11 +52,6 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 	nr_nodes = numa_max_node() + 1;
 
-	//old_nodes = numa_bitmask_alloc(nr_nodes);
-	//new_nodes = numa_bitmask_alloc(nr_nodes);
-	//numa_bitmask_setbit(old_nodes, 1);
-	//numa_bitmask_setbit(new_nodes, 0);
-
 
 	pid_t pid = getpid();
 
@@ -130,48 +125,70 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 	// lfence = load fence
 	// sfence = save fence
 	// mfence = save + load fence
+	//
+	int real_secs = 3;
+
+	mfence();
+	compiler_fence();
+
+	t1 = rdtscp(); 
+	sleep(real_secs);
+
+	t2 = rdtscp();
+
+	mfence();
+	compiler_fence();
+
+	printf("Calibration: real_secs = %d rdtscp %ld cycles %.2f s\n", real_secs, t2 - t1, cycles_to_nsecs(t2 - t1,freq) / 1000000000.00f);
+
 
 	for(i = 0; i < aligned_size / sizeof(unsigned long); i++) {
 
+		printf("i=%d\n", i);
 		printf("aligned_ptr=%p\n", aligned_ptr);
 
+		compiler_fence();
 		mfence();
 
 		clflush(aligned_ptr);
 
 		mfence();  //serialize clflush
 		//lfence();                      
-		
-		compiler_fence();
+		//compiler_fence();
 
-		t1 = rdtsc();                    
+		//measure LOAD when cache miss
+		t1 = rdtscp();                    
 
-		mfence();                      
-
+		lfence();                      
 		compiler_fence();
 
 		x = *((unsigned long *)aligned_ptr);             
 
 		lfence();        
-		
 		compiler_fence();
 
-		t2 = rdtsc();
+		t2 = rdtscp();
 		
 		lfence();                      
-
 		compiler_fence();
 
+		//cache miss
 		ms1 = t2 - t1;
 
+		mfence();
 		compiler_fence();
-		
-		x++;
+			
+		printf( "Memory miss latency: %lu cycles %.2f ns\n", ms1, cycles_to_nsecs(ms1, freq));
+
+		x++; 
 
 		mfence();  
-		lfence();  
+		compiler_fence();
+		//lfence();  
 		
-		t1 = rdtsc();
+		//measure LOAD when cache hit
+		//
+		t1 = rdtscp();
 		
 		lfence(); 
 		compiler_fence();
@@ -179,30 +196,50 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 		x = *((unsigned long *)aligned_ptr);
 
 		lfence();  
-		t2 = rdtsc();
-		lfence();
-
 		compiler_fence();
+
+		t2 = rdtscp();
+
+		lfence();
+		compiler_fence();
+
+		//cache hit
 		hs1 = t2 - t1;
+
+		mfence();
+		compiler_fence();
 
 		printf( "Memory hit latency: %lu cycles %.2f ns\n", hs1, cycles_to_nsecs(hs1, freq));
 
 
 		mfence();  
-		lfence();  
-		t1 = rdtsc(); 
-		lfence();  
+		compiler_fence();
+		//lfence();  
+		t1 = rdtscp(); 
+
+		(void) rdtscp();
 		lfence(); 
-		t2 = rdtsc();
+	        compiler_fence();
+
+		(void) rdtscp();
+		lfence(); 
+	        compiler_fence();
+
+		t2 = rdtscp();
+
 		lfence();  
+		compiler_fence();
 		os1 = t2 - t1;
+
+		mfence();  
+		compiler_fence();
 
 		printf( "Overhead latency: %lu cycles %.2f ns\n", os1, cycles_to_nsecs(os1, freq)); 
 
 
-		printf( "Measured L1 hit latency: %lu cycles %.2f ns\n", hs1 - os1, cycles_to_nsecs(hs1 - os1, freq)); 
+		printf( "Cache hit latency: %lu cycles %.2f ns\n", hs1 - os1, cycles_to_nsecs(hs1 - os1, freq)); 
 
-		printf( "Measured main memory latency: %lu cycles %.2f ns\n", ms1 - os1, cycles_to_nsecs(ms1 - os1, freq)); 
+		printf( "Memory latency: %lu cycles %.2f ns\n", ms1 - os1, cycles_to_nsecs(ms1 - os1, freq)); 
 
 		aligned_ptr += sizeof(unsigned long);
 
@@ -218,9 +255,7 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 int main(int argc, char **argv)
 {
 
-	if(nice(-20)) {
-		perror("Warning, failed in nice().\n");
-	}
+	(void) nice(-20);
 
 	calculate_memory_access_time(0, 0);
 	//calculate_memory_access_time(0, 1);

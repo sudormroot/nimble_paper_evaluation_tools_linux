@@ -38,13 +38,22 @@ inline void clflush(volatile void *ptr)
 }
 
 
-inline uint64_t rdtsc(void)
+inline uint64_t rdtscp(void)
 {
-        volatile unsigned long lo,hi;
+    volatile unsigned  lo,hi;
 
-        asm volatile ( "rdtsc":"=a"(lo),"=d"(hi));
+    asm volatile
+        ( "CPUID\n\t"
+          "RDTSC\n\t"
+          "mov %%edx, %0\n\t"
+          "mov %%eax, %1\n\t"
+          :
+          "=r" (hi), "=r" (lo)
+          ::
+          "rax", "rbx", "rcx", "rdx"
+        );
 
-        return (uint64_t)hi << 32 | lo;
+        return (uint64_t)hi << 32 | (uint64_t)lo;
 }
 
 inline double measure_cpu_freq(void)
@@ -60,11 +69,11 @@ inline double measure_cpu_freq(void)
 	printf("Measuring CPU processor ...\n");
 
 	gettimeofday(&t1, (struct timezone *) 0);
-	c1 = rdtsc();
+	c1 = rdtscp();
 
 	sleep(interval);
 
-	c2 = rdtsc();
+	c2 = rdtscp();
 	gettimeofday(&t2, (struct timezone *) 0);
 
 	//in microsecond
