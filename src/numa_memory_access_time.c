@@ -9,18 +9,12 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <errno.h>
-//#include <inttypes.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <fcntl.h>
-//#include <sys/mman.h>
 #include <sched.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-
-//#include <immintrin.h>
-//#include <x86intrin.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -256,13 +250,23 @@ void calculate_memory_access_time(int cpu_node, int mem_node)
 
 int main(int argc, char **argv)
 {
+	int cpu_node = 0;
+	int mem_node = 0;
+
+	int nodes_nr = 0;
 
 	(void) nice(-20);
+	
+	setbuf(stdout, NULL);
 
-	calculate_memory_access_time(0, 0);
-	//calculate_memory_access_time(0, 1);
-	//calculate_memory_access_time(1, 0);
-	//calculate_memory_access_time(1, 1);
+	ndes_nr = numa_max_node();
+
+	for(cpu_node = 0; cpu_node < nodes_nr; cpu_node++) {
+		for(mem_node = 0; mem_node < nodes_nr; mem_node++) {
+			printf("Measuring on cpu #%d mem #%d\n", cpu_node, mem_node);
+			calculate_memory_access_time(cpu_node, mem_node);
+		}
+	}
 
 	printf("Finished.\n");
 	
