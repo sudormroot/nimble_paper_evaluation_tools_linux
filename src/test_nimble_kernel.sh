@@ -8,11 +8,13 @@ FASTMEM_SIZE_LIMIT="`seq 1 1 24`"  # from 1,2,3,....,24 respectively
 CORES_NR="`cat /proc/cpuinfo|grep processor|wc -l`"
 MAXTHREAD_NR="`seq 1 1 $CORES_NR`" # testing threads
 
+if [ $# = 0 ];then
+	echo "$0 <CMD> <ARG1> ..."
+	exit
+else
+	APP_CMD="$@" 
+fi
 
-APP_CMD="echo 'Hello World!'" 
-
-MEMHOG="/usr/bin/memhog"
-MEMHOG_NR=3
 
 #############################################
 #   Set basic memory allocation policies    #
@@ -43,8 +45,8 @@ echo "$pid" > /sys/fs/cgroup/two-level-memory/cgroup.procs
 
 echo "Inject traffic to slow memory on NUMA node #1 ..."
 
-if [ ! -f "" ]; then
- echo "numa_memory_traffic_injector not found, try make"
+if [ ! -f "numa_memory_traffic_injector" ]; then
+	echo "numa_memory_traffic_injector not found, try make"
 fi
 
 ./numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8
