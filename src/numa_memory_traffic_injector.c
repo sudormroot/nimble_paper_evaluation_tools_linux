@@ -4,12 +4,14 @@
  *
  * */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <getopt.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sched.h>
@@ -20,8 +22,8 @@
 #include <numaif.h>
 
 #include "cpu_util.h"
+#include "cpu_freq.h"
 
-static double freq = 1; /*CPU freq*/
 
 static struct option long_options [] = 
 {
@@ -73,13 +75,21 @@ int main(int argc, char **argv)
 	int thread_num = 0;
 
 	pid_t *child_pids = NULL;
+	pid_t pid;
 
 	int i = 0;
 
-	int status;
+	int child_status;
 
+	double freq;  /*CPU freq*/
 
 	setbuf(stdout, NULL);
+
+	if(argc != 5) {
+		printf("%s --cpu-node=<NUMA CPU Node> --mem-node=<NUMA Memory Node> --mem-size=<Size-in-MB> --thread-num=<Thread-Number>\n", argv[0]);
+		exit(0);
+	}
+
 
 	while ((c = getopt_long(argc, argv, "C:M:m:T:", long_options, &option_index)) != -1) {
 		switch (c) {
@@ -100,7 +110,7 @@ int main(int argc, char **argv)
 				mem_node = atoi(optarg);
 				break;
 			case 'm':
-				mem_size = atol(optarg);
+				mem_size = atol(optarg) << 20;
 				printf("mem-size: %s MB\n", optarg);
 				break;
 			case 'T':
@@ -114,7 +124,8 @@ int main(int argc, char **argv)
 
 
 
-	(void) nice(-20);
+	nice(-20);
+
 	/*
 	 * Bind process to cpu node
 	 * */
@@ -125,9 +136,10 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	printf("Pid #%d is bound to cpu node #%d.\n", pid, cpu_node);
+	printf("Pid #%d is bound to cpu node #%d.\n", getpid(), cpu_node);
 
 	
+
 	freq = measure_cpu_freq();
 
 
@@ -192,10 +204,10 @@ int main(int argc, char **argv)
 		waitpid(child_pids[i], &child_status, 0);
 
 
-	numa_free_nodemask(cpu_node);
-	numa_free_nodemask(mem_node);
+	numa_free_nodemask(cpu_mask);
+	numa_free_nodemask(mem_mask);
 
-	numa_free(ptr, size);
+	numa_free(ptr, mem_size);
 	numa_free(child_pids, sizeof(pid_t) * thread_num);
 
 	return 0;

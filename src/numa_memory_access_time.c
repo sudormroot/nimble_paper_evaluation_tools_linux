@@ -20,6 +20,7 @@
 #include <numaif.h>
 
 #include "cpu_util.h"
+#include "cpu_freq.h"
 
 #define MAX_MEM_SIZE	(32 << 20) 
 #define ALIGN_SIZE	64
@@ -39,7 +40,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 	char node_str[16];
 
-	volatile uint64_t t1, t2, ms1, hs1, os1;
+	volatile uint64_t t1, t2, ms1, hs1, os1, hc, mc;
 	volatile register unsigned long x = 0;
 
 	volatile double freq = 0;
@@ -247,17 +248,27 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		printf( "Overhead latency: %lu cycles %.2f ns\n", os1, cycles_to_nsecs(os1, freq)); 
 
 
-		//printf( "Cache hit latency: %lu cycles %.2f ns\n", hs1 - os1, cycles_to_nsecs(hs1 - os1, freq)); 
+		if(hs1 > os1)
+			hc = hs1 - os1;
+		else
+			hc = hs1;
 
-		//printf( "Memory latency: %lu cycles %.2f ns\n", ms1 - os1, cycles_to_nsecs(ms1 - os1, freq)); 
+		if(ms1 > os1)
+			mc = ms1 - os1;
+		else
+			mc = ms1;
+
+		printf( "Cache hit latency: %lu cycles %.2f ns\n", hc, cycles_to_nsecs(hc, freq)); 
+
+		printf( "Memory latency: %lu cycles %.2f ns\n", mc, cycles_to_nsecs(mc, freq)); 
 
 		aligned_ptr += sizeof(unsigned long);
 
 		//break;
 	}
 
-	numa_free_nodemask(cpu_node);
-	numa_free_nodemask(mem_node);
+	numa_free_nodemask(cpu_mask);
+	numa_free_nodemask(mem_mask);
 	
 	numa_free(ptr, size);
 }
@@ -269,7 +280,7 @@ int main(int argc, char **argv)
 
 	int nodes_nr = 0;
 
-	(void) nice(-20);
+	nice(-20);
 	
 	setbuf(stdout, NULL);
 

@@ -9,7 +9,7 @@ CORES_NR="`cat /proc/cpuinfo|grep processor|wc -l`"
 MAXTHREAD_NR="`seq 1 1 $CORES_NR`" # testing threads
 
 
-APP_CMD="find /bin" 
+APP_CMD="echo 'Hello World!'" 
 
 MEMHOG="/usr/bin/memhog"
 MEMHOG_NR=3
@@ -21,7 +21,7 @@ MEMHOG_NR=3
 
 echo "Set basic memory allocation policies ..."
 # create customized control-group named two-level-memory
-sudo mkdir /sys/fs/cgroup/$CGROUP
+sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 
 # enable memory control
 sudo echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control
@@ -43,7 +43,11 @@ echo "$pid" > /sys/fs/cgroup/two-level-memory/cgroup.procs
 
 echo "Inject traffic to slow memory on NUMA node #1 ..."
 
-numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8
+if [ ! -f "" ]; then
+ echo "numa_memory_traffic_injector not found, try make"
+fi
+
+./numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8
 
 
 #############################################
