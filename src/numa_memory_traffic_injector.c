@@ -23,38 +23,105 @@
 
 static double freq = 1; /*CPU freq*/
 
+static struct option long_options [] = 
+{
+	{"cpu-node", 	required_argument, 0, 'C'},
+	{"mem-node", 	required_argument, 0, 'M'},
+	{"mem-size", 	required_argument, 0, 'm'},
+	{"thread-num", 	required_argument, 0, 'T'},
+	{0,0,0,0}
+};
+
+static void inject_memory_traffic(void *ptr, size_t size)
+{
+	int i = 0;
+	char *pos = NULL;
+	char c;
+
+	while(1) {
+		pos = (char *)ptr + i++ % size;
+		mfence();
+		c = *pos;
+		mfence();
+		*pos = i % 255;
+		clflush(pos);
+		mfence();
+	}
+
+}
+
 int main(int argc, char **argv)
 {
 
 	struct bitmask *cpu_mask = NULL;
 	struct bitmask *mem_mask = NULL;
 
-	pid_t pid;
 	
+	int mem_node = 0;
+	int cpu_node = 0;
+
 	int nodes_nr;
 
-	int cpu_node;
-	int mem_node;
+	size_t mem_size=0;
+
+	char c;
+	int option_index = 0;
+
+
+	void *ptr = NULL;
+
+	int thread_num = 0;
+
+	pid_t *child_pids = NULL;
+
+	int i = 0;
+
+	int status;
 
 
 	setbuf(stdout, NULL);
 
-	(void) nice(-20);
-
-	cpu_mask = numa_allocate_nodemask();
-
-	if(cpu_mask == NULL) {
-		perror("numa_allocate_nodemask() failed\n");
-		exit(-1);
+	while ((c = getopt_long(argc, argv, "C:M:m:T:", long_options, &option_index)) != -1) {
+		switch (c) {
+			//case 0:
+			//	if (long_options[option_index].flag != 0)
+			//		break;
+			//
+			//	printf ("option %s = %s\n", long_options[option_index].name, optarg?optarg:"NULL");
+			//	break;
+			case 'C':
+				cpu_mask = numa_parse_nodestring(optarg);
+				printf("cpu-node: %s\n", optarg);
+				cpu_node = atoi(optarg);
+				break;
+			case 'M':
+				mem_mask = numa_parse_nodestring(optarg);
+				printf("mem-node: %s\n", optarg);
+				mem_node = atoi(optarg);
+				break;
+			case 'm':
+				mem_size = atol(optarg);
+				printf("mem-size: %s MB\n", optarg);
+				break;
+			case 'T':
+				thread_num = atol(optarg);
+				printf("thread-num: %s MB\n", optarg);
+				break;
+			default:
+				abort();
+		}
 	}
-	
-	(void) numa_bitmask_clearall(cpu_mask);
 
-	numa_bitmask_setbit(cpu_mask, cpu_node);
 
-		//numa_sched_setaffinity
-	if (sched_setaffinity(pid, numa_bitmask_nbytes(cpu_mask), (cpu_set_t*)cpu_mask->maskp) < 0) {
-		perror("sched_setaffinity() failed");
+
+	(void) nice(-20);
+	/*
+	 * Bind process to cpu node
+	 * */
+
+		
+	if(numa_run_on_node_mask_all(cpu_mask)) {
+		perror("numa_run_on_node_mask_all() failed");
 		exit(-1);
 	}
 
@@ -64,17 +131,10 @@ int main(int argc, char **argv)
 	freq = measure_cpu_freq();
 
 
+	/*
+	 * Bind process to cpu node
+	 * */
 
-	mem_mask = numa_allocate_nodemask();
-
-	if(mem_mask == NULL) {
-		perror("numa_allocate_nodemask() failed\n");
-		exit(-1);
-	}
-
-	(void) numa_bitmask_clearall(mem_mask);
-
-	numa_bitmask_setbit(mem_mask, mem_node);
 
 	if (set_mempolicy(MPOL_BIND, mem_mask->maskp, mem_mask->size + 1) < 0) {
 		perror("set_mempolicy() failed\n");
@@ -83,6 +143,60 @@ int main(int argc, char **argv)
 
 	printf("Bind memory allocation to node #%d.\n", mem_node);
 
+
+	/*
+	 *
+	 * prepare cache-line aligned memory
+	 *
+	 * */
+	
+	
+	ptr = numa_alloc_onnode(mem_size, mem_node);
+
+	if(ptr == NULL) {
+		perror("numa_alloc_onnode() failed\n");
+		exit(-1);
+	}
+	
+	/*
+	 * Spawn child processes
+	 *
+	 * */
+
+	child_pids = numa_alloc_onnode(sizeof(pid_t) * thread_num, mem_node);
+
+	if(child_pids == NULL) {
+		perror("numa_alloc_onnode() failed\n");
+		exit(-1);
+	}
+
+	memset(child_pids, 0, sizeof(pid_t) * thread_num);
+
+	for(i = 0; i < thread_num; i++) {
+
+		pid = fork();
+
+		if(pid != 0) {
+			// in parent
+			child_pids[i] = pid;
+		} else {
+			// in child
+			inject_memory_traffic(ptr, mem_size);
+
+			exit(0); //make CC happy
+		}
+	}
+
+	//make CC happy
+	for(i = 0; i < thread_num; i++)
+		waitpid(child_pids[i], &child_status, 0);
+
+
+	numa_free_nodemask(cpu_node);
+	numa_free_nodemask(mem_node);
+
+	numa_free(ptr, size);
+	numa_free(child_pids, sizeof(pid_t) * thread_num);
 
 	return 0;
 }

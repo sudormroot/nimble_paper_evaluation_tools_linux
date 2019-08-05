@@ -43,7 +43,7 @@ echo "$pid" > /sys/fs/cgroup/two-level-memory/cgroup.procs
 
 echo "Inject traffic to slow memory on NUMA node #1 ..."
 
-numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=512M --band-width=0.5 #occupy 50%
+numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8
 
 
 #############################################

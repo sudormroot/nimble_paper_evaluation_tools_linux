@@ -37,6 +37,8 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	struct bitmask *cpu_mask = NULL;
 	struct bitmask *mem_mask = NULL;
 
+	char node_str[16];
+
 	volatile uint64_t t1, t2, ms1, hs1, os1;
 	volatile register unsigned long x = 0;
 
@@ -56,20 +58,23 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	printf("pid        %-d\n", pid);
 	printf("NUMA nodes %-d\n", nr_nodes);
 
-	cpu_mask = numa_allocate_nodemask();
+	/*
+	 * Bind process to cpu node
+	 * */
+
+	memset(node_str, 0, sizeof(node_str));
+
+	(void) snprintf(node_str, sizeof(node_str), "%d", cpu_node);
+
+	cpu_mask = numa_parse_nodestring(node_str);
 
 	if(cpu_mask == NULL) {
-		perror("numa_allocate_nodemask() failed\n");
+		perror("numa_parse_nodestring() failed\n");
 		exit(-1);
 	}
 	
-	(void) numa_bitmask_clearall(cpu_mask);
-
-	numa_bitmask_setbit(cpu_mask, cpu_node);
-
-		//numa_sched_setaffinity
-	if (sched_setaffinity(pid, numa_bitmask_nbytes(cpu_mask), (cpu_set_t*)cpu_mask->maskp) < 0) {
-		perror("sched_setaffinity() failed");
+	if(numa_run_on_node_mask_all(cpu_mask)) {
+		perror("numa_run_on_node_mask_all() failed");
 		exit(-1);
 	}
 
@@ -80,16 +85,21 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 
 
-	mem_mask = numa_allocate_nodemask();
+	/*
+	 * Bind process to cpu node
+	 * */
+
+	memset(node_str, 0, sizeof(node_str));
+
+	(void) snprintf(node_str, sizeof(node_str), "%d", mem_node);
+
+	mem_mask = numa_parse_nodestring(node_str);
 
 	if(mem_mask == NULL) {
-		perror("numa_allocate_nodemask() failed\n");
+		perror("numa_parse_nodestring() failed\n");
 		exit(-1);
 	}
 
-	(void) numa_bitmask_clearall(mem_mask);
-
-	numa_bitmask_setbit(mem_mask, mem_node);
 
 	if (set_mempolicy(MPOL_BIND, mem_mask->maskp, mem_mask->size + 1) < 0) {
 		perror("set_mempolicy() failed\n");
@@ -99,8 +109,12 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	printf("Bind memory allocation to node #%d.\n", mem_node);
 
 
-	//prepare cache-line aligned memory
-	//
+	/*
+	 *
+	 * prepare cache-line aligned memory
+	 *
+	 * */
+	
 	size = MAX_MEM_SIZE; 
 	
 	ptr = numa_alloc_onnode(size, mem_node);
