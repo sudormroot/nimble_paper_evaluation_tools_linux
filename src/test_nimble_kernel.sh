@@ -47,9 +47,10 @@ echo "Inject traffic to slow memory on NUMA node #1 ..."
 
 if [ ! -f "numa_memory_traffic_injector" ]; then
 	echo "numa_memory_traffic_injector not found, try make"
+	make 
 fi
 
-./numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8
+./numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8 &
 
 
 #############################################
