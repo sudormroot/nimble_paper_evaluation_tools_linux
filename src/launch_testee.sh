@@ -162,19 +162,19 @@ test_cleanup() {
 	exit
 }
 
-handle_signal_SIGINT() {
+handle_signal_INT() {
 	echo "INT signal is captured, cleaning up ..." | tee $LOG_FILE
 	test_cleanup
 }
 
-handle_signal_SIGALRM() {
+handle_signal_ALRM() {
 	collect_stats
 	sleep $STATS_COLLECT_INTERVAL
-	kill -SIGALRM $$
+	kill -ALRM $$
 }
 
-trap "handle_signal_SIGINT"  SIGINT
-trap "handle_signal_SIGALRM" SIGALRM
+trap "handle_signal_INT"  INT
+trap "handle_signal_ALRM" ALRM
 
 
 #############################################
@@ -252,6 +252,6 @@ $APP_CMD | tee $APPLOG_FILE &
 echo "Child PID: $!"
 
 # Begin to collect system statistics
-kill -SIGALRM $$
+kill -ALRM $$
 
 test_cleanup
