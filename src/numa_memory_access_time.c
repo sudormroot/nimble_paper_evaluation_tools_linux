@@ -22,7 +22,7 @@
 #include "cpu_util.h"
 #include "cpu_freq.h"
 
-#define MAX_MEM_SIZE	(40960) 
+#define MAX_MEM_SIZE	(4096) 
 #define ALIGN_SIZE	64
 
 void measure_memory_access_time(int cpu_node, int mem_node)
@@ -191,9 +191,9 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		hit_ptr = &hit_latencies[i];
 		mem_ptr = &mem_latencies[i];
 
-
-		printf("i=%d\n", i);
-		printf("aligned_ptr=%p\n", aligned_ptr);
+		printf(".");
+		//printf("i=%d\n", i);
+		//printf("aligned_ptr=%p\n", aligned_ptr);
 
 		compiler_fence();
 		mfence();
@@ -226,7 +226,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		mfence();
 		compiler_fence();
 			
-		printf( "Memory miss latency: %lu cycles %.2f ns\n", mem_cycles, cycles_to_nsecs(mem_cycles, freq));
+		//printf( "Memory miss latency: %lu cycles %.2f ns\n", mem_cycles, cycles_to_nsecs(mem_cycles, freq));
 
 		x++; 
 
@@ -257,7 +257,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		mfence();
 		compiler_fence();
 
-		printf( "Memory hit latency: %lu cycles %.2f ns\n", hit_cycles, cycles_to_nsecs(hit_cycles, freq));
+		//printf( "Memory hit latency: %lu cycles %.2f ns\n", hit_cycles, cycles_to_nsecs(hit_cycles, freq));
 
 
 		mfence();  
@@ -282,7 +282,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		mfence();  
 		compiler_fence();
 
-		printf( "Overhead latency: %lu cycles %.2f ns\n", overhead_cycles, cycles_to_nsecs(overhead_cycles, freq)); 
+		//printf( "Overhead latency: %lu cycles %.2f ns\n", overhead_cycles, cycles_to_nsecs(overhead_cycles, freq)); 
 
 
 		if(hit_cycles > overhead_cycles)
@@ -299,22 +299,23 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 		*mem_ptr = cycles_to_nsecs(_mem_cycles, freq); 
 
-		if(*hit_ptr < hit_min)
+
+		if(*hit_ptr < hit_min || i == 0)
 			hit_min = *hit_ptr;
 
 		if(*hit_ptr > hit_max)
 			hit_max = *hit_ptr;
 
-		if(*mem_ptr < mem_min)
+		if(*mem_ptr < mem_min || i == 0)
 			mem_min = *mem_ptr;
 
 		if(*mem_ptr > mem_max)
 			mem_max = *mem_ptr;
 
 
-		printf( "Cache hit latency: %lu cycles %.2f ns min %.2f ns max %.2f ns\n", _hit_cycles, *hit_ptr, hit_min, hit_max);
+		//printf( "Cache hit latency: %lu cycles %.2f ns min %.2f ns max %.2f ns\n", _hit_cycles, *hit_ptr, hit_min, hit_max);
 
-		printf( "Memory latency: %lu cycles %.2f ns min %.2f ns max %.2f ns\n", _mem_cycles, *mem_ptr, mem_min, mem_max);
+		//printf( "Memory latency: %lu cycles %.2f ns min %.2f ns max %.2f ns\n", _mem_cycles, *mem_ptr, mem_min, mem_max);
 
 
 		aligned_ptr += sizeof(unsigned long);
@@ -335,9 +336,12 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 	}
 
+	
+
 	hit_avg = sum1 / (double) (aligned_size / sizeof(unsigned long));
 	mem_avg = sum2 / (double) (aligned_size / sizeof(unsigned long));
 
+	printf("\n");
 	printf("Cache hit average %.2f ns min %.2f ns max %.2f ns\n", hit_avg, hit_min, hit_max);
 	printf("Memory access %.2f ns min %.2f max %.2f ns\n", mem_avg, mem_min, mem_max);
 
