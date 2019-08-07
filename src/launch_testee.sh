@@ -129,44 +129,6 @@ echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" >> $CONFIG_FILE
 echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
-
-collect_stats(){
-	echo "CMD=sysctl vm" >> $STATS_FILE
-	log_time $STATS_FILE
-	sudo sysctl vm >> $STATS_FILE
-	echo "" >> $STATS_FILE
-
-	echo "CMD=numastat" >> $STATS_FILE
-	log_time $STATS_FILE
-	numastat >> $STATS_FILE
-	echo "" >> $STATS_FILE
-	
-	echo "CMD=numastat -m" >> $STATS_FILE
-	log_time $STATS_FILE
-	numastat -m >> $STATS_FILE
-	echo "" >> $STATS_FILE
-
-	echo "CMD=numastat -p $$" >> $STATS_FILE
-	log_time $STATS_FILE
-	numastat -p $$ | tee -a $STATS_FILE
-	echo "" >> $STATS_FILE
-
-	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
-	log_time $STATS_FILE
-	cat /proc/meminfo >> $STATS_FILE
-	echo "" >> $STATS_FILE
-
-	echo "CMD=cat /proc/zoneinfo" >> $STATS_FILE
-	log_time $STATS_FILE
-	cat /proc/zoneinfo >> $STATS_FILE
-	echo "" >> $STATS_FILE
-
-	echo "CMD=cat /proc/vmstat" >> $STATS_FILE
-	log_time $STATS_FILE
-	cat /proc/vmstat >> $STATS_FILE
-	echo "" >> $STATS_FILE
-}
-
 test_cleanup() {
 	kill -9 $?
 	killall numa_memory_traffic_injector 2>/dev/zero
@@ -180,14 +142,8 @@ handle_signal_INT() {
 	test_cleanup
 }
 
-handle_signal_ALRM() {
-	collect_stats
-	sleep $STATS_COLLECT_INTERVAL
-	kill -ALRM $$
-}
 
 trap "handle_signal_INT"  INT
-trap "handle_signal_ALRM" ALRM
 
 
 #############################################
@@ -255,15 +211,15 @@ fi
 #   Start testing                           #
 #############################################
 
-collect_stats
 
-echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee -a $LOG_FILE
+log_time $LOG_FILE
 
-$APP_CMD | tee -a $APPLOG_FILE &
+collect_stats_path="`dirname $0`""/collect_stats.sh"
 
-#echo "Child PID: $!"
+$collect_stats_path &
 
-# Begin to collect system statistics
-kill -ALRM $$
+#$APP_CMD | tee -a $APPLOG_FILE &
+exec $APP_CMD
+
 
 test_cleanup
