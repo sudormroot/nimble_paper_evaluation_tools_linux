@@ -152,8 +152,6 @@ collect_stats(){
 }
 
 test_cleanup() {
-	echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee -a $LOG_FILE
-
 	kill -9 $?
 	killall numa_memory_traffic_injector 2>/dev/zero
 
@@ -162,6 +160,7 @@ test_cleanup() {
 
 handle_signal_INT() {
 	echo "INT signal is captured, cleaning up ..." | tee -a $LOG_FILE
+	log_time $LOG_FILE
 	test_cleanup
 }
 
