@@ -40,11 +40,11 @@ if [ ! -d "$RESULT_DIR" ];then
 fi
 
 log_time() {
-	echo "Time: `date '+%Y-%m-%d %H:%M:%S %s:%N'`" >> $1
+	echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" | tee -a $1
 }
 
 
-echo "CMD : $0 $*" | tee $LOG_FILE
+echo "CMD : $0 $*" | tee -a $LOG_FILE
 log_time $LOG_FILE
 echo "" >> $LOG_FILE
 
@@ -59,23 +59,23 @@ while [ 1 = 1 ] ; do
 	case "$1" in
 		-M|--thp_migration=*) 
 			THP_MIGRATION=`echo ${1#*=}`
-			echo "THP_MIGRATION=$THP_MIGRATION" | tee $LOG_FILE
+			echo "THP_MIGRATION=$THP_MIGRATION" | tee -a $LOG_FILE
 			shift 1;;
 		-i|--enable-traffic-injection) 
 			ENABLE_TRAFFIC_INJECTION=1
-			echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" | tee $LOG_FILE
+			echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" | tee -a $LOG_FILE
 			shift 1;;
 		-M|--max-mem-size=*) 
 			MAX_MEM_SIZE=`echo ${1#*=}`
-			echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee $LOG_FILE
+			echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee -a $LOG_FILE
 			shift 1;;
 		-m|--fast-mem-size=*) 
 			FAST_MEM_SIZE=`echo ${1#*=}`
-			echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee $LOG_FILE
+			echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 			shift 1;;
 		-t|--migration-threads-num*) 
 			MIGRATION_THREADS_NUM=`echo ${1#*=}`
-			echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee $LOG_FILE
+			echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee -a $LOG_FILE
 			shift 1 ;;
 		--) 
 			shift 1
@@ -120,39 +120,39 @@ echo "APP_CMD: $APP_CMD" > $APPLOG_FILE
 
 
 collect_stats(){
-	echo "CMD=sysctl vm" | tee $STATS_FILE
+	echo "CMD=sysctl vm" | tee -a $STATS_FILE
 	log_time $STATS_FILE
-	sudo sysctl vm | tee $STATS_FILE
-	echo "" | tee $STATS_FILE
+	sudo sysctl vm | tee -a $STATS_FILE
+	echo "" | tee -a $STATS_FILE
 
-	echo "CMD=numastat" | tee $STATS_FILE
+	echo "CMD=numastat" | tee -a $STATS_FILE
 	log_time $STATS_FILE
-	numastat | tee $STATS_FILE
-	echo "" | tee $STATS_FILE
+	numastat | tee -a $STATS_FILE
+	echo "" | tee -a $STATS_FILE
 	
-	echo "CMD=numastat -m" | tee $STATS_FILE
+	echo "CMD=numastat -m" | tee -a $STATS_FILE
 	log_time $STATS_FILE
-	numastat -m | tee $STATS_FILE
-	echo "" | tee $STATS_FILE
+	numastat -m | tee -a $STATS_FILE
+	echo "" | tee -a $STATS_FILE
 
-	echo "CMD=cat /proc/meminfo" | tee $STATS_FILE
+	echo "CMD=cat /proc/meminfo" | tee -a $STATS_FILE
 	log_time $STATS_FILE
-	cat /proc/meminfo | tee $STATS_FILE
-	echo "" | tee $STATS_FILE
+	cat /proc/meminfo | tee -a $STATS_FILE
+	echo "" | tee -a $STATS_FILE
 
-	echo "CMD=cat /proc/zoneinfo" | tee $STATS_FILE
+	echo "CMD=cat /proc/zoneinfo" | tee -a $STATS_FILE
 	log_time $STATS_FILE
-	cat /proc/zoneinfo | tee $STATS_FILE
-	echo "" | tee $STATS_FILE
+	cat /proc/zoneinfo | tee -a $STATS_FILE
+	echo "" | tee -a $STATS_FILE
 
-	echo "CMD=cat /proc/vmstat" | tee $STATS_FILE
+	echo "CMD=cat /proc/vmstat" | tee -a $STATS_FILE
 	log_time $STATS_FILE
-	cat /proc/vmstat | tee $STATS_FILE
-	echo "" | tee $STATS_FILE
+	cat /proc/vmstat | tee -a $STATS_FILE
+	echo "" | tee -a $STATS_FILE
 }
 
 test_cleanup() {
-	echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
+	echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee -a $LOG_FILE
 
 	kill -9 $?
 	killall numa_memory_traffic_injector 2>/dev/zero
@@ -161,7 +161,7 @@ test_cleanup() {
 }
 
 handle_signal_INT() {
-	echo "INT signal is captured, cleaning up ..." | tee $LOG_FILE
+	echo "INT signal is captured, cleaning up ..." | tee -a $LOG_FILE
 	test_cleanup
 }
 
@@ -180,7 +180,7 @@ trap "handle_signal_ALRM" ALRM
 #############################################
 
 
-echo "Set parameters ..." | tee $LOG_FILE
+echo "Set parameters ..." | tee -a $LOG_FILE
 
 sudo ulimit -n $MAX_OPEN_FILES
 echo "Set maximum open files to $MAX_OPEN_FILES"
@@ -192,17 +192,17 @@ sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 sudo echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control
 
 sudo echo "$MAX_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max
-echo "memory.max is set to $MAX_MEM_SIZE MB" | tee $LOG_FILE
+echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
 
 sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
-echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee $LOG_FILE
+echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
 
 
 sudo echo "$FAST_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:0
-echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $FAST_MEM_SIZE MB" | tee $LOG_FILE
+echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 
 sudo sysctl vm/limit_mt_num=$MIGRATION_THREADS_NUM
-echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee $LOG_FILE
+echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee -a $LOG_FILE
 
 sync
 
@@ -211,7 +211,7 @@ echo "Set /proc/sys/vm/drop_caches to $DROP_CACHES_INTERVAL"
 
 pid=$$
 echo "$pid" > /sys/fs/cgroup/$CGROUP/cgroup.procs
-echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee $LOG_FILE
+echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
 
 
 #############################################
@@ -219,10 +219,10 @@ echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee $LOG_FILE
 #############################################
 
 inject_traffic() {
-	echo "Inject traffic to slow memory on NUMA node #1 ..." | tee $LOG_FILE
+	echo "Inject traffic to slow memory on NUMA node #1 ..." | tee -a $LOG_FILE
 
 	if [ ! -f "numa_memory_traffic_injector" ]; then
-		echo "numa_memory_traffic_injector not found, try make" | tee $LOG_FILE
+		echo "numa_memory_traffic_injector not found, try make" | tee -a $LOG_FILE
 		make 
 	fi
 
@@ -243,9 +243,9 @@ fi
 
 collect_stats
 
-echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
+echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee -a $LOG_FILE
 
-$APP_CMD | tee $APPLOG_FILE &
+$APP_CMD | tee -a $APPLOG_FILE &
 
 #echo "Child PID: $!"
 
