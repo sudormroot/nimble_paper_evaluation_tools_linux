@@ -157,7 +157,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 	if(hit_latencies == NULL || mem_latencies == NULL) {
 		perror("malloc() failed\n");
-		exit(-1)
+		exit(-1);
 	}
 
 	memset(hit_latencies, 0, sizeof(double) * (aligned_size / sizeof(unsigned long)));
