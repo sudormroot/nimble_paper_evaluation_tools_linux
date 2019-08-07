@@ -72,11 +72,11 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	pid_t pid = getpid();
 
 
-	printf("Testing memory access time ...\n");
-	printf("cpu_node   %-d\n", cpu_node);
-	printf("mem_node   %-d\n", mem_node);
-	printf("pid        %-d\n", pid);
-	printf("NUMA nodes %-d\n", nr_nodes);
+//	printf("Testing memory access time ...\n");
+//	printf("cpu_node   %-d\n", cpu_node);
+//	printf("mem_node   %-d\n", mem_node);
+//	printf("pid        %-d\n", pid);
+//	printf("NUMA nodes %-d\n", nr_nodes);
 
 
 
@@ -100,7 +100,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		exit(-1);
 	}
 
-	printf("Pid #%d is bound to cpu node #%d.\n", pid, cpu_node);
+//	printf("Pid #%d is bound to cpu node #%d.\n", pid, cpu_node);
 
 	
 
@@ -127,7 +127,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		exit(-1);
 	}
 
-	printf("Bind memory allocation to node #%d.\n", mem_node);
+	//printf("Bind memory allocation to node #%d.\n", mem_node);
 
 
 	/*
@@ -327,8 +327,8 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	mem_avg = sum2 / (double) (aligned_size / sizeof(unsigned long));
 
 	printf("\n");
-	printf("Cache hit average %.2f ns min %.2f ns max %.2f ns\n", hit_avg, hit_min, hit_max);
-	printf("Memory access %.2f ns min %.2f max %.2f ns\n", mem_avg, mem_min, mem_max);
+	printf("Cache hit average     : %.2f ns min %.2f ns max %.2f ns\n", hit_avg, hit_min, hit_max);
+	printf("Memory access average : %.2f ns min %.2f ns max %.2f ns\n", mem_avg, mem_min, mem_max);
 	printf("\n");
 
 	free(hit_latencies);
