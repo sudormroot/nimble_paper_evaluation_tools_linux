@@ -8,7 +8,7 @@ RESULT_DIR="test_result_dir-""`date '+%Y%m%d_%H-%M-%S_%s-%N'`"
 LOG_FILE="$RESULT_DIR""/log.txt"
 STATS_FILE="$RESULT_DIR""/stats.txt"
 APPLOG_FILE="$RESULT_DIR""/applog.txt"
-
+CONFIG_FILE="$RESULT_DIR""/config.txt"
 
 MAX_OPEN_FILES=100000
 
@@ -37,6 +37,7 @@ if [ ! -d "$RESULT_DIR" ];then
 	echo "" >  $LOG_FILE
 	echo "" >  $STATS_FILE
 	echo "" >  $APPLOG_FILE
+	echo "" >  $CONFIG_FILE
 fi
 
 log_time() {
@@ -113,10 +114,20 @@ fi
 
 APP_CMD="numactl --cpunodebind=0 --preferred=0 $@" 
 
-echo "APP_CMD: $APP_CMD"
+echo "APP_CMD=$APP_CMD"
 
-echo "APP_CMD: $APP_CMD" > $LOG_FILE
-echo "APP_CMD: $APP_CMD" > $APPLOG_FILE
+echo "APP_CMD=$APP_CMD" >> $LOG_FILE
+echo "APP_CMD=$APP_CMD" >> $APPLOG_FILE
+echo "APP_CMD=$APP_CMD" >> $CONFIG_FILE
+
+echo "DROP_CACHES_INTERVAL=$DROP_CACHES_INTERVAL" >> $CONFIG_FILE
+echo "STATS_COLLECT_INTERVAL=$STATS_COLLECT_INTERVAL" >> $CONFIG_FILE
+echo "MAX_MEM_SIZE=$MAX_MEM_SIZE" >> $CONFIG_FILE
+echo "FAST_MEM_SIZE=$FAST_MEM_SIZE" >> $CONFIG_FILE
+echo "MIGRATION_THREADS_NUM=$MIGRATION_THREADS_NUM" >> $CONFIG_FILE
+echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" >> $CONFIG_FILE
+echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
+
 
 
 collect_stats(){
