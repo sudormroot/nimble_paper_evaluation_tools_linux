@@ -48,7 +48,7 @@ static void inject_memory_traffic(void *ptr, size_t size)
 		mfence();
 		c = *pos;
 		mfence();
-		*pos = rand() % 255;
+		*pos = i % 255;
 		clflush(pos);
 		mfence();
 	}
