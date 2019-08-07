@@ -21,6 +21,8 @@ MIGRATION_THREADS_NUM="0"
 ENABLE_TRAFFIC_INJECTION="0"
 THP_MIGRATION="x"
 
+CHILD_PID="$$"
+
 
 show_usage() {
 	echo "$0 [--enable-traffic-injection] --thp_migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
@@ -155,8 +157,8 @@ collect_stats(){
 	numastat -m >> $STATS_FILE
 	echo "" >> $STATS_FILE
 
-	echo "CMD=numastat -p $pid" >> $STATS_FILE
-	numastat -p $pid | tee -a $STATS_FILE
+	echo "CMD=numastat -p $CHILD_PID" >> $STATS_FILE
+	numastat -p $CHILD_PID | tee -a $STATS_FILE
 	echo "" >> $STATS_FILE
 
 	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
@@ -251,12 +253,9 @@ fi
 
 log_time $LOG_FILE
 
-collect_stats_path="`dirname $0`""/collect_stats.sh"
+stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE &
 
-$collect_stats_path $STATS_FILE $STATS_COLLECT_INTERVAL $$ &
-
-#$APP_CMD | tee -a $APPLOG_FILE &
-exec $APP_CMD
+CHILD_PID="$?"
 
 #begin to collect statistics
 kill -ALRM $$
