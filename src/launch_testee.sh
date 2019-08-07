@@ -23,7 +23,7 @@ THP_MIGRATION="x"
 
 
 show_usage() {
-	echo "$0 [--enable-traffic-injection] --thp_migration=<1|0> --max-mem-size=<Size-in-GB> --fast-mem-size=<Size-in-GB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	echo "$0 [--enable-traffic-injection] --thp_migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
 if [ $# = 0 ];then
@@ -67,11 +67,11 @@ while [ 1 = 1 ] ; do
 			shift 1;;
 		-M|--max-mem-size=*) 
 			MAX_MEM_SIZE=`echo ${1#*=}`
-			echo "MAX_MEM_SIZE=$MAX_MEM_SIZE" | tee $LOG_FILE
+			echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee $LOG_FILE
 			shift 1;;
 		-m|--fast-mem-size=*) 
 			FAST_MEM_SIZE=`echo ${1#*=}`
-			echo "FAST_MEM_SIZE=$FAST_MEM_SIZE" | tee $LOG_FILE
+			echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee $LOG_FILE
 			shift 1;;
 		-t|--migration-threads-num*) 
 			MIGRATION_THREADS_NUM=`echo ${1#*=}`
@@ -93,14 +93,14 @@ fi
 
 
 if [ "$MAX_MEM_SIZE" = "0" ]; then
-	echo "Required --max-mem-size=<Size-in-GB>"
+	echo "Required --max-mem-size=<Size-in-MB>"
 	show_usage
 	exit
 fi
 
 
 if [ "$FAST_MEM_SIZE" = "0" ]; then
-	echo "Required --fast-mem-size=<Size-in-GB>"
+	echo "Required --fast-mem-size=<Size-in-MB>"
 	show_usage
 	exit
 fi
@@ -193,15 +193,15 @@ sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 # enable memory control
 sudo echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control
 
-sudo echo "$MAX_MEM_SIZE" > /sys/fs/cgroup/$CGROUP/memory.max
-echo "memory.max is set to $MAX_MEM_SIZE" | tee $LOG_FILE
+sudo echo "$MAX_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max
+echo "memory.max is set to $MAX_MEM_SIZE MB" | tee $LOG_FILE
 
 sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee $LOG_FILE
 
 
-sudo echo "$MAX_MEM_SIZE""G" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:0
-echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $MAX_MEM_SIZE""G" | tee $LOG_FILE
+sudo echo "$FAST_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:0
+echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $FAST_MEM_SIZE MB" | tee $LOG_FILE
 
 sudo sysctl vm/limit_mt_num=$MIGRATION_THREADS_NUM
 echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee $LOG_FILE
@@ -246,7 +246,8 @@ fi
 collect_stats
 
 echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
-exec $APP_CMD | tee $APPLOG_FILE &
+
+$APP_CMD | tee $APPLOG_FILE &
 
 echo "Child PID: $!"
 
