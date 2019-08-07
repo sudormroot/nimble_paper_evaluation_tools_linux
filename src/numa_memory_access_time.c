@@ -22,7 +22,7 @@
 #include "cpu_util.h"
 #include "cpu_freq.h"
 
-#define MAX_MEM_SIZE	(32 << 20) 
+#define MAX_MEM_SIZE	(1 << 20) 
 #define ALIGN_SIZE	64
 
 void measure_memory_access_time(int cpu_node, int mem_node)
@@ -40,8 +40,26 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 	char node_str[16];
 
-	volatile uint64_t t1, t2, ms1, hs1, os1, hc, mc;
+	volatile uint64_t c1, c2, mem_cycles, hit_cycles, overhead_cycles, _hit_cycles, _mem_cycles;
 	volatile register unsigned long x = 0;
+
+
+	double *hit_latencies;
+	double *mem_latencies;
+
+	double *hit_ptr;
+	double *mem_ptr;
+
+	double hit_avg = 0;
+	double mem_avg = 0;
+
+	double hit_max = 0;
+	double hit_min = 0;
+
+	double mem_max = 0;
+	double mem_min = 0;
+
+	double sum1, sum2;
 
 	volatile double freq = 0;
 
@@ -58,6 +76,8 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	printf("mem_node   %-d\n", mem_node);
 	printf("pid        %-d\n", pid);
 	printf("NUMA nodes %-d\n", nr_nodes);
+
+
 
 	/*
 	 * Bind process to cpu node
@@ -131,6 +151,19 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	aligned_size = size - (unsigned long)ptr % sizeof(unsigned long);
 
 	
+	hit_latencies = malloc(sizeof(double) * (aligned_size / sizeof(unsigned long)));
+
+	mem_latencies = malloc(sizeof(double) * (aligned_size / sizeof(unsigned long)));
+
+	if(hit_latencies == NULL || mem_latencies == NULL) {
+		perror("malloc() failed\n");
+		exit(-1)
+	}
+
+	memset(hit_latencies, 0, sizeof(double) * (aligned_size / sizeof(unsigned long)));
+	memset(mem_latencies, 0, sizeof(double) * (aligned_size / sizeof(unsigned long)));
+
+
 	// lfence = load fence
 	// sfence = save fence
 	// mfence = save + load fence
@@ -140,20 +173,24 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	compiler_fence();
 	mfence();
 
-	t1 = rdtscp(); 
+	c1 = rdtscp(); 
 	mfence();
 
 	sleep(real_secs);
 
-	t2 = rdtscp();
+	c2 = rdtscp();
 
 	mfence();
 	compiler_fence();
 
-	printf("Calibration: real_secs = %d rdtscp %ld cycles %.2f s\n", real_secs, t2 - t1, cycles_to_nsecs(t2 - t1,freq) / 1000000000.00f);
+	printf("Calibration: real_secs = %d rdtscp %ld cycles %.2f s\n", real_secs, c2 - c1, cycles_to_nsecs(c2 - c1,freq) / 1000000000.00f);
 
 
 	for(i = 0; i < aligned_size / sizeof(unsigned long); i++) {
+
+		hit_ptr = &hit_latencies[i];
+		mem_ptr = &mem_latencies[i];
+
 
 		printf("i=%d\n", i);
 		printf("aligned_ptr=%p\n", aligned_ptr);
@@ -168,7 +205,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		compiler_fence();
 
 		//measure LOAD when cache miss
-		t1 = rdtscp();                    
+		c1 = rdtscp();                    
 
 		mfence();                      
 		compiler_fence();
@@ -178,18 +215,18 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		mfence();        
 		compiler_fence();
 
-		t2 = rdtscp();
+		c2 = rdtscp();
 		
 		mfence();                      
 		compiler_fence();
 
 		//cache miss
-		ms1 = t2 - t1;
+		mem_cycles = c2 - c1;
 
 		mfence();
 		compiler_fence();
 			
-		printf( "Memory miss latency: %lu cycles %.2f ns\n", ms1, cycles_to_nsecs(ms1, freq));
+		printf( "Memory miss latency: %lu cycles %.2f ns\n", mem_cycles, cycles_to_nsecs(mem_cycles, freq));
 
 		x++; 
 
@@ -199,7 +236,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		
 		//measure LOAD when cache hit
 		//
-		t1 = rdtscp();
+		c1 = rdtscp();
 		
 		mfence(); 
 		compiler_fence();
@@ -209,24 +246,24 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		mfence();  
 		compiler_fence();
 
-		t2 = rdtscp();
+		c2 = rdtscp();
 
 		mfence();
 		compiler_fence();
 
 		//cache hit
-		hs1 = t2 - t1;
+		hit_cycles = c2 - c1;
 
 		mfence();
 		compiler_fence();
 
-		printf( "Memory hit latency: %lu cycles %.2f ns\n", hs1, cycles_to_nsecs(hs1, freq));
+		printf( "Memory hit latency: %lu cycles %.2f ns\n", hit_cycles, cycles_to_nsecs(hit_cycles, freq));
 
 
 		mfence();  
 		compiler_fence();
 		//lfence();  
-		t1 = rdtscp(); 
+		c1 = rdtscp(); 
 
 		//(void) rdtscp();
 		mfence(); 
@@ -236,36 +273,76 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		mfence(); 
 	        compiler_fence();
 
-		t2 = rdtscp();
+		c2 = rdtscp();
 
 		mfence();  
 		compiler_fence();
-		os1 = t2 - t1;
+		overhead_cycles = c2 - c1;
 
 		mfence();  
 		compiler_fence();
 
-		printf( "Overhead latency: %lu cycles %.2f ns\n", os1, cycles_to_nsecs(os1, freq)); 
+		printf( "Overhead latency: %lu cycles %.2f ns\n", overhead_cycles, cycles_to_nsecs(overhead_cycles, freq)); 
 
 
-		if(hs1 > os1)
-			hc = hs1 - os1;
+		if(hit_cycles > overhead_cycles)
+			_hit_cycles = hit_cycles - overhead_cycles;
 		else
-			hc = hs1;
+			_hit_cycles = hit_cycles;
 
-		if(ms1 > os1)
-			mc = ms1 - os1;
+		if(mem_cycles > overhead_cycles)
+			_mem_cycles = mem_cycles - overhead_cycles;
 		else
-			mc = ms1;
+			_mem_cycles = mem_cycles;
 
-		printf( "Cache hit latency: %lu cycles %.2f ns\n", hc, cycles_to_nsecs(hc, freq)); 
+		*hit_ptr = cycles_to_nsecs(_hit_cycles, freq);
 
-		printf( "Memory latency: %lu cycles %.2f ns\n", mc, cycles_to_nsecs(mc, freq)); 
+		*mem_ptr = cycles_to_nsecs(_mem_cycles, freq); 
+
+		if(*hit_ptr < hit_min)
+			hit_min = *hit_ptr;
+
+		if(*hit_ptr > hit_max)
+			hit_max = *hit_ptr;
+
+		if(*mem_ptr < mem_min)
+			mem_min = *mem_ptr;
+
+		if(*mem_ptr > mem_max)
+			mem_max = *mem_ptr;
+
+
+		printf( "Cache hit latency: %lu cycles %.2f ns min %.2f ns max %.2f ns\n", _hit_cycles, *hit_ptr, hit_min, hit_max);
+
+		printf( "Memory latency: %lu cycles %.2f ns min %.2f ns max %.2f ns\n", _mem_cycles, *mem_ptr, mem_min, mem_max);
+
 
 		aligned_ptr += sizeof(unsigned long);
 
 		//break;
 	}
+
+	sum1 = 0;
+	sum2 = 0;
+
+	for(i = 0; i < aligned_size / sizeof(unsigned long); i++) {
+
+		hit_ptr = &hit_latencies[i];
+		mem_ptr = &mem_latencies[i];
+
+		sum1 += *hit_ptr;
+		sum2 += *mem_ptr;
+
+	}
+
+	hit_avg = sum1 / (double) (aligned_size / sizeof(unsigned long));
+	mem_avg = sum2 / (double) (aligned_size / sizeof(unsigned long));
+
+	printf("Cache hit average %.2f ns\n", hit_avg);
+	printf("Memory access %.2f ns\n", mem_avg);
+
+	free(hit_latencies);
+	free(mem_latencies);
 
 	numa_free_nodemask(cpu_mask);
 	numa_free_nodemask(mem_mask);
