@@ -1,10 +1,12 @@
-git clone ...
 
-cd src
+Build tools:
 
-make clean && make
+$ git clone https://github.com/sudormroot/memory_test_tools_linux.git
+$ cd memory_test_tools_linux/src 
+$ make clean && make
 
+Launch your application:
 
-test_nimble_kernel.sh <your-app-command>
+./launch_testee.sh [--enable-traffic-injection] --thp_migration=<1|0> --max-mem-size=<Size-in-GB> --fast-mem-size=<Size-in-GB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ...
 
 
