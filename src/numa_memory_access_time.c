@@ -25,6 +25,8 @@
 #define MAX_MEM_SIZE	(4096) 
 #define ALIGN_SIZE	64
 
+static volatile double freq = 0;
+
 void measure_memory_access_time(int cpu_node, int mem_node)
 {
 	int nr_nodes;
@@ -61,7 +63,6 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 
 	double sum1, sum2;
 
-	volatile double freq = 0;
 
 	int i;
 
@@ -102,7 +103,6 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	printf("Pid #%d is bound to cpu node #%d.\n", pid, cpu_node);
 
 	
-	freq = measure_cpu_freq();
 
 
 
@@ -168,23 +168,6 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	// sfence = save fence
 	// mfence = save + load fence
 	//
-	int real_secs = 3;
-
-	compiler_fence();
-	mfence();
-
-	c1 = rdtscp(); 
-	mfence();
-
-	sleep(real_secs);
-
-	c2 = rdtscp();
-
-	mfence();
-	compiler_fence();
-
-	printf("Calibration: real_secs = %d rdtscp %ld cycles %.2f s\n", real_secs, c2 - c1, cycles_to_nsecs(c2 - c1,freq) / 1000000000.00f);
-
 
 	for(i = 0; i < aligned_size / sizeof(unsigned long); i++) {
 
@@ -362,13 +345,34 @@ int main(int argc, char **argv)
 
 	int nodes_nr = 0;
 
+	uint64_t c1, c2;
+	int real_secs = 3;
+
 	nice(-20);
 	
 	setbuf(stdout, NULL);
 
-	nodes_nr = numa_max_node();
+	nodes_nr = numa_max_node() + 1;
 
 	printf("NUMA nodes: %d\n", nodes_nr);
+
+	freq = measure_cpu_freq();
+
+	compiler_fence();
+	mfence();
+
+	c1 = rdtscp(); 
+	mfence();
+
+	sleep(real_secs);
+
+	c2 = rdtscp();
+
+	mfence();
+	compiler_fence();
+
+	printf("Frequency calibration: real_secs = %d rdtscp %ld cycles %.2f s\n", real_secs, c2 - c1, cycles_to_nsecs(c2 - c1,freq) / 1000000000.00f);
+
 
 	for(cpu_node = 0; cpu_node < nodes_nr; cpu_node++) {
 		for(mem_node = 0; mem_node < nodes_nr; mem_node++) {
