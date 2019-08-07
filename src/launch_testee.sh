@@ -21,7 +21,6 @@ MIGRATION_THREADS_NUM="0"
 ENABLE_TRAFFIC_INJECTION="0"
 THP_MIGRATION="x"
 
-CHILD_PID="$$"
 
 
 show_usage() {
@@ -157,8 +156,8 @@ collect_stats(){
 	numastat -m >> $STATS_FILE
 	echo "" >> $STATS_FILE
 
-	echo "CMD=numastat -p $CHILD_PID" >> $STATS_FILE
-	numastat -p $CHILD_PID >>  -a $STATS_FILE
+	echo "CMD=numastat -p $$" >> $STATS_FILE
+	numastat -p $$ >>  -a $STATS_FILE
 	echo "" >> $STATS_FILE
 
 	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
@@ -259,7 +258,6 @@ log_time $LOG_FILE
 #
 stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE &
 
-CHILD_PID="$?"
 
 #begin to collect statistics
 kill -ALRM $$
