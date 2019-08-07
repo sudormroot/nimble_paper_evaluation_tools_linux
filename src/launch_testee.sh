@@ -216,7 +216,7 @@ log_time $LOG_FILE
 
 collect_stats_path="`dirname $0`""/collect_stats.sh"
 
-$collect_stats_path &
+$collect_stats_path $STATS_FILE $STATS_COLLECT_INTERVAL $$ &
 
 #$APP_CMD | tee -a $APPLOG_FILE &
 exec $APP_CMD
