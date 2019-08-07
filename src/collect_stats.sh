@@ -5,7 +5,7 @@ interval="$2"
 pid="$3"
 
 if [ "$#" != 3 ];then
-	echo "$0 <statsfile> <interval>"
+	echo "$0 <statsfile> <interval> <pid>"
 	exit
 fi
 
