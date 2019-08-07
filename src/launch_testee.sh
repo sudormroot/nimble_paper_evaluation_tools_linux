@@ -10,6 +10,7 @@ STATS_FILE="$RESULT_DIR""/stats.txt"
 APPLOG_FILE="$RESULT_DIR""/applog.txt"
 
 
+MAX_OPEN_FILES=100000
 
 DROP_CACHES_INTERVAL=3	   #drop caches for every 3 seconds	
 STATS_COLLECT_INTERVAL=5   #collect system statistics every 5 seconds
@@ -182,7 +183,8 @@ trap "handle_signal_ALRM" ALRM
 
 echo "Set parameters ..." | tee $LOG_FILE
 
-
+sudo ulimit -n $MAX_OPEN_FILES
+echo "Set maximum open files to $MAX_OPEN_FILES"
 
 # create customized control-group named two-level-memory
 sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
