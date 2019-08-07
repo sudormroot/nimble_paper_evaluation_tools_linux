@@ -15,6 +15,7 @@
 #include <sched.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <getopt.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -81,3 +82,5 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
+
