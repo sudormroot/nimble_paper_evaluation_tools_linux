@@ -42,6 +42,8 @@ int main(int argc, char **argv)
 
 	void *ptr = NULL;
 
+	size_t total=0;
+
 	setbuf(stdout, NULL);
 
 	if(argc != 3) {
@@ -53,7 +55,7 @@ int main(int argc, char **argv)
 	while ((c = getopt_long(argc, argv, "n:s:", long_options, &option_index)) != -1) {
 		switch (c) {
 			case 'm':
-				size = atol(optarg) << 20;
+				size = atol(optarg);
 				printf("size: %s MB\n", optarg);
 				break;
 			case 'n':
@@ -64,23 +66,32 @@ int main(int argc, char **argv)
 				abort();
 		}
 	}
-
-	ptr = numa_alloc_onnode(size, node);
-
-	if(ptr == NULL) {
-		perror("numa_alloc_onnode() failed\n");
-		exit(-1);
-	}
 	
-	printf("%ld MB memory is allocated on NUMA node #%d\n", size, node);
+	total=0;
+
+	while(1) {
+		
+		if(total >= size)
+			break;
+
+		ptr = numa_alloc_onnode(1 << 20, node);
+
+		if(ptr == NULL) {
+			sleep(1);
+			continue;
+		}
+
+		total += 1;
+
+		printf("Total %ld MB memory is occupied on NUMA node #%d\n", total, node);
+
+	}
 
 	while(1) {
 		sleep(100);
 	}
 
-	numa_free(ptr, size);
-
-	return 0;
+	exit(0);
 }
 
 
