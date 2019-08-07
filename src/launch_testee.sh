@@ -41,7 +41,7 @@ if [ ! -d "$RESULT_DIR" ];then
 fi
 
 log_time() {
-	echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" | tee -a $1
+	echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" >> $1
 }
 
 
@@ -131,35 +131,35 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 collect_stats(){
-	echo "CMD=sysctl vm" | tee -a $STATS_FILE
+	echo "CMD=sysctl vm" >> $STATS_FILE
 	log_time $STATS_FILE
-	sudo sysctl vm | tee -a $STATS_FILE
-	echo "" | tee -a $STATS_FILE
+	sudo sysctl vm >> $STATS_FILE
+	echo "" >> $STATS_FILE
 
-	echo "CMD=numastat" | tee -a $STATS_FILE
+	echo "CMD=numastat" >> $STATS_FILE
 	log_time $STATS_FILE
-	numastat | tee -a $STATS_FILE
-	echo "" | tee -a $STATS_FILE
+	numastat >> $STATS_FILE
+	echo "" >> $STATS_FILE
 	
-	echo "CMD=numastat -m" | tee -a $STATS_FILE
+	echo "CMD=numastat -m" >> $STATS_FILE
 	log_time $STATS_FILE
-	numastat -m | tee -a $STATS_FILE
-	echo "" | tee -a $STATS_FILE
+	numastat -m >> $STATS_FILE
+	echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/meminfo" | tee -a $STATS_FILE
+	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
 	log_time $STATS_FILE
-	cat /proc/meminfo | tee -a $STATS_FILE
-	echo "" | tee -a $STATS_FILE
+	cat /proc/meminfo >> $STATS_FILE
+	echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/zoneinfo" | tee -a $STATS_FILE
+	echo "CMD=cat /proc/zoneinfo" >> $STATS_FILE
 	log_time $STATS_FILE
-	cat /proc/zoneinfo | tee -a $STATS_FILE
-	echo "" | tee -a $STATS_FILE
+	cat /proc/zoneinfo >> $STATS_FILE
+	echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/vmstat" | tee -a $STATS_FILE
+	echo "CMD=cat /proc/vmstat" >> $STATS_FILE
 	log_time $STATS_FILE
-	cat /proc/vmstat | tee -a $STATS_FILE
-	echo "" | tee -a $STATS_FILE
+	cat /proc/vmstat >> $STATS_FILE
+	echo "" >> $STATS_FILE
 }
 
 test_cleanup() {
