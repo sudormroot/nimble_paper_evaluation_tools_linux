@@ -67,6 +67,8 @@ int main(int argc, char **argv)
 		}
 	}
 	
+	size = (size << 20) >> 12;
+
 	total=0;
 
 	while(1) {
@@ -74,16 +76,18 @@ int main(int argc, char **argv)
 		if(total >= size)
 			break;
 
-		ptr = numa_alloc_onnode(1 << 20, node);
+		ptr = numa_alloc_onnode(4096, node);
 
 		if(ptr == NULL) {
 			sleep(1);
 			continue;
 		}
 
+		memset(ptr, 0, 4096);
+
 		total += 1;
 
-		printf("Total %ld MB memory is occupied on NUMA node #%d\n", total, node);
+		printf("Total %ld MB memory is occupied on NUMA node #%d\n", (total << 12) >> 20, node);
 
 	}
 
