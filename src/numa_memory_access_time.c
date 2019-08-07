@@ -344,6 +344,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	printf("\n");
 	printf("Cache hit average %.2f ns min %.2f ns max %.2f ns\n", hit_avg, hit_min, hit_max);
 	printf("Memory access %.2f ns min %.2f max %.2f ns\n", mem_avg, mem_min, mem_max);
+	printf("\n");
 
 	free(hit_latencies);
 	free(mem_latencies);
@@ -366,6 +367,8 @@ int main(int argc, char **argv)
 	setbuf(stdout, NULL);
 
 	nodes_nr = numa_max_node();
+
+	printf("NUMA nodes: %d\n", nodes_nr);
 
 	for(cpu_node = 0; cpu_node < nodes_nr; cpu_node++) {
 		for(mem_node = 0; mem_node < nodes_nr; mem_node++) {
