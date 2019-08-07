@@ -4,7 +4,7 @@ statsfile="$1"
 interval="$2"
 pid="$3"
 
-if [ "$#" != 4 ];then
+if [ "$#" != 3 ];then
 	echo "$0 <statsfile> <interval>"
 	exit
 fi
