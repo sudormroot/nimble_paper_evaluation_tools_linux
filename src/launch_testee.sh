@@ -146,6 +146,11 @@ collect_stats(){
 	numastat -m >> $STATS_FILE
 	echo "" >> $STATS_FILE
 
+	echo "CMD=numastat -p $$" >> $STATS_FILE
+	log_time $STATS_FILE
+	numastat -p $$ | tee -a $STATS_FILE
+	echo "" >> $STATS_FILE
+
 	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
 	log_time $STATS_FILE
 	cat /proc/meminfo >> $STATS_FILE
@@ -192,7 +197,7 @@ trap "handle_signal_ALRM" ALRM
 
 echo "Set parameters ..." | tee -a $LOG_FILE
 
-sudo ulimit -n $MAX_OPEN_FILES
+ulimit -n $MAX_OPEN_FILES
 echo "Set maximum open files to $MAX_OPEN_FILES"
 
 # create customized control-group named two-level-memory
@@ -214,10 +219,9 @@ echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $FAST_MEM_SIZE MB" | te
 sudo sysctl vm/limit_mt_num=$MIGRATION_THREADS_NUM
 echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee -a $LOG_FILE
 
-sync
-
-sudo echo $DROP_CACHES_INTERVAL > /proc/sys/vm/drop_caches
-echo "Set /proc/sys/vm/drop_caches to $DROP_CACHES_INTERVAL"
+#sync
+#sudo echo $DROP_CACHES_INTERVAL > /proc/sys/vm/drop_caches
+#echo "Set /proc/sys/vm/drop_caches to $DROP_CACHES_INTERVAL"
 
 pid=$$
 echo "$pid" > /sys/fs/cgroup/$CGROUP/cgroup.procs
