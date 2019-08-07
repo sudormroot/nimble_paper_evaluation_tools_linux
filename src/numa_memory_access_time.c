@@ -22,7 +22,7 @@
 #include "cpu_util.h"
 #include "cpu_freq.h"
 
-#define MAX_MEM_SIZE	(4096) 
+#define MAX_MEM_SIZE	(1 << 20) 
 #define ALIGN_SIZE	64
 
 static volatile double freq = 0;
@@ -174,7 +174,9 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		hit_ptr = &hit_latencies[i];
 		mem_ptr = &mem_latencies[i];
 
-		printf(".");
+		if(i == 0 || i % 1024 == 0)
+			printf(".");
+
 		//printf("i=%d\n", i);
 		//printf("aligned_ptr=%p\n", aligned_ptr);
 
