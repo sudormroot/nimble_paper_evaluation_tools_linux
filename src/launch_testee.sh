@@ -142,7 +142,44 @@ handle_signal_INT() {
 	test_cleanup
 }
 
+collect_stats(){
+	echo "CMD=sysctl vm" >> $STATS_FILE
+	sudo sysctl vm >> $STATS_FILE
+	echo "" >> $STATS_FILE
 
+	echo "CMD=numastat" >> $STATS_FILE
+	numastat >> $STATS_FILE
+	echo "" >> $STATS_FILE
+	
+	echo "CMD=numastat -m" >> $STATS_FILE
+	numastat -m >> $STATS_FILE
+	echo "" >> $STATS_FILE
+
+	echo "CMD=numastat -p $pid" >> $STATS_FILE
+	numastat -p $pid | tee -a $STATS_FILE
+	echo "" >> $STATS_FILE
+
+	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
+	cat /proc/meminfo >> $STATS_FILE
+	echo "" >> $STATS_FILE
+
+	echo "CMD=cat /proc/zoneinfo" >> $STATS_FILE
+	cat /proc/zoneinfo >> $STATS_FILE
+	echo "" >> $STATS_FILE
+
+	echo "CMD=cat /proc/vmstat" >> $STATS_FILE
+	cat /proc/vmstat >> $STATS_FILE
+	echo "" >> $STATS_FILE
+}
+
+
+handle_signal_ALRM() {
+	collect_stats
+	sleep $STATS_COLLECT_INTERVAL
+	kill -ALRM $$
+}
+
+trap "handle_signal_ALRM" ALRM
 trap "handle_signal_INT"  INT
 
 
@@ -221,5 +258,7 @@ $collect_stats_path $STATS_FILE $STATS_COLLECT_INTERVAL $$ &
 #$APP_CMD | tee -a $APPLOG_FILE &
 exec $APP_CMD
 
+#begin to collect statistics
+kill -ALRM $$
 
 test_cleanup
