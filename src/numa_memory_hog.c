@@ -16,6 +16,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <getopt.h>
+#include <time.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -43,6 +44,10 @@ int main(int argc, char **argv)
 	void *ptr = NULL;
 
 	size_t total=0;
+
+	time_t seed;
+
+	srand((unsigned) time(&seed));
 
 	setbuf(stdout, NULL);
 
@@ -76,6 +81,12 @@ int main(int argc, char **argv)
 		if(total >= size)
 			break;
 
+		/*
+		 * All numa memory allocation policy only takes effect when a
+   		 * page is actually faulted into the address space of a process
+   		 * by accessing it. The numa_alloc_* functions take care of this
+   		 * automatically.
+		 * */
 		ptr = numa_alloc_onnode(4096, node);
 
 		if(ptr == NULL) {
@@ -83,7 +94,8 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		memset(ptr, 0, 4096);
+		//store something
+		memset(ptr, rand() % 256, 4096);
 
 		total += 1;
 
