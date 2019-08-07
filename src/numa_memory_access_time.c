@@ -22,7 +22,7 @@
 #include "cpu_util.h"
 #include "cpu_freq.h"
 
-#define MAX_MEM_SIZE	(1 << 20) 
+#define MAX_MEM_SIZE	(8 << 20) 
 #define ALIGN_SIZE	64
 
 static volatile double freq = 0;
@@ -350,7 +350,7 @@ int main(int argc, char **argv)
 	uint64_t c1, c2;
 	int real_secs = 3;
 
-	nice(-20);
+	(void) nice(-20);
 	
 	setbuf(stdout, NULL);
 
