@@ -113,8 +113,10 @@ fi
 
 APP_CMD="numactl --cpunodebind=0 --preferred=0 $@" 
 
-echo "APP_CMD: $APP_CMD" | tee $LOG_FILE
-echo "APP_CMD: $APP_CMD" | tee $APPLOG_FILE
+echo "APP_CMD: $APP_CMD"
+
+echo "APP_CMD: $APP_CMD" > $LOG_FILE
+echo "APP_CMD: $APP_CMD" > $APPLOG_FILE
 
 
 collect_stats(){
@@ -154,26 +156,25 @@ collect_stats(){
 
 test_cleanup() {
 	echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
-	echo "INT signal is captured, cleaning up ..." | tee $LOG_FILE
-	killall numa_memory_traffic_injector 2>/dev/zero
 
-	collect_stats
+	killall numa_memory_traffic_injector 2>/dev/zero
 
 	exit
 }
 
-handle_signal_INT() {
+handle_signal_SIGINT() {
+	echo "INT signal is captured, cleaning up ..." | tee $LOG_FILE
 	test_cleanup
 }
 
-handle_signal_ALRM() {
+handle_signal_SIGALRM() {
 	collect_stats
 	sleep $STATS_COLLECT_INTERVAL
-	kill -ALRM $$
+	kill -SIGALRM $$
 }
 
-trap "handle_signal_INT"  INT
-trap "handle_signal_ALRM" ALRM
+trap "handle_signal_SIGINT"  SIGINT
+trap "handle_signal_SIGALRM" SIGALRM
 
 
 #############################################
@@ -250,6 +251,6 @@ exec $APP_CMD | tee $APPLOG_FILE &
 echo "Child PID: $!"
 
 # Begin to collect system statistics
-kill -ALRM $$
+kill -SIGALRM $$
 
 test_cleanup
