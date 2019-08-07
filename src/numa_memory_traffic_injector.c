@@ -17,6 +17,7 @@
 #include <sched.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <time.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -39,6 +40,8 @@ static void inject_memory_traffic(void *ptr, size_t size)
 	int i = 0;
 	char *pos = NULL;
 	char c;
+
+	printf("Injecting traffic, pid=%d ...\n",getpid());
 
 	while(1) {
 		pos = (char *)ptr + i++ % size;
@@ -82,6 +85,11 @@ int main(int argc, char **argv)
 	int child_status;
 
 	double freq;  /*CPU freq*/
+
+	time_t seed;
+
+
+	srand((unsigned) time(&seed));
 
 	setbuf(stdout, NULL);
 
@@ -193,6 +201,7 @@ int main(int argc, char **argv)
 			child_pids[i] = pid;
 		} else {
 			// in child
+
 			inject_memory_traffic(ptr, mem_size);
 
 			exit(0); //make CC happy
