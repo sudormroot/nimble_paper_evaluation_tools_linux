@@ -40,7 +40,7 @@ if [ ! -d "$RESULT_DIR" ];then
 fi
 
 log_time() {
-	echo "Time: `date '+%Y-%m-%d %H:%M:%S %s:%N'`" | tee $1
+	echo "Time: `date '+%Y-%m-%d %H:%M:%S %s:%N'`" >> $1
 }
 
 
@@ -124,9 +124,6 @@ collect_stats(){
 	log_time $STATS_FILE
 	sudo sysctl vm | tee $STATS_FILE
 	echo "" | tee $STATS_FILE
-
-	echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
-	echo "=== NUMA stat for basic  ===" | tee $LOG_FILE
 
 	echo "CMD=numastat" | tee $STATS_FILE
 	log_time $STATS_FILE
