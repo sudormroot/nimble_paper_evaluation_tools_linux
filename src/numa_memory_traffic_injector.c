@@ -48,7 +48,7 @@ static void inject_memory_traffic(void *ptr, size_t size)
 		mfence();
 		c = *pos;
 		mfence();
-		*pos = i % 255;
+		*pos = rand() % 255;
 		clflush(pos);
 		mfence();
 	}
@@ -131,6 +131,7 @@ int main(int argc, char **argv)
 	}
 
 
+	printf("Inject traffic on memory node %d, executing on cpu node %d, ...\n", mem_node, cpu_node);
 
 	nice(-20);
 
@@ -144,7 +145,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	printf("Pid #%d is bound to cpu node #%d.\n", getpid(), cpu_node);
+	//printf("Pid #%d is bound to cpu node #%d.\n", getpid(), cpu_node);
 
 	
 
@@ -161,7 +162,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	printf("Bind memory allocation to node #%d.\n", mem_node);
+	//printf("Bind memory allocation to node #%d.\n", mem_node);
 
 
 	/*
