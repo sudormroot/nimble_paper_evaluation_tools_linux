@@ -157,6 +157,7 @@ collect_stats(){
 test_cleanup() {
 	echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
 
+	kill -9 $?
 	killall numa_memory_traffic_injector 2>/dev/zero
 
 	exit
@@ -249,7 +250,7 @@ echo "Time: `date '+%Y%m%d_%H-%M-%S'`" | tee $LOG_FILE
 
 $APP_CMD | tee $APPLOG_FILE &
 
-echo "Child PID: $!"
+#echo "Child PID: $!"
 
 # Begin to collect system statistics
 kill -ALRM $$
