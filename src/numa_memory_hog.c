@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
 	while ((c = getopt_long(argc, argv, "n:s:", long_options, &option_index)) != -1) {
 		switch (c) {
-			case 'm':
+			case 's':
 				size = atol(optarg);
 				printf("size: %s MB\n", optarg);
 				break;
