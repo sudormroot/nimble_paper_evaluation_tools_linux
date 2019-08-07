@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
-	if(argc != 5) {
+	if(argc != 3) {
 		printf("%s --node=<NUMA Node> --size=<Size-in-MB>\n", argv[0]);
 		exit(0);
 	}
