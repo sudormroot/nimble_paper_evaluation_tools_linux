@@ -56,11 +56,11 @@ int main(int argc, char **argv)
 		switch (c) {
 			case 's':
 				size = atol(optarg);
-				printf("size: %s MB\n", optarg);
+				printf("size: %d MB\n", size);
 				break;
 			case 'n':
 				node = atoi(optarg);
-				printf("node: %s\n", optarg);
+				printf("node: %d\n", node);
 				break;
 			default:
 				abort();
