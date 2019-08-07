@@ -22,7 +22,7 @@
 #include "cpu_util.h"
 #include "cpu_freq.h"
 
-#define MAX_MEM_SIZE	(1 << 20) 
+#define MAX_MEM_SIZE	(40960) 
 #define ALIGN_SIZE	64
 
 void measure_memory_access_time(int cpu_node, int mem_node)
