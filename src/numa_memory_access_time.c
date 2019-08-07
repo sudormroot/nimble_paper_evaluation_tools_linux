@@ -338,8 +338,8 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	hit_avg = sum1 / (double) (aligned_size / sizeof(unsigned long));
 	mem_avg = sum2 / (double) (aligned_size / sizeof(unsigned long));
 
-	printf("Cache hit average %.2f ns\n", hit_avg);
-	printf("Memory access %.2f ns\n", mem_avg);
+	printf("Cache hit average %.2f ns min %.2f ns max %.2f ns\n", hit_avg, hit_min, hit_max);
+	printf("Memory access %.2f ns min %.2f max %.2f ns\n", mem_avg, mem_min, mem_max);
 
 	free(hit_latencies);
 	free(mem_latencies);
