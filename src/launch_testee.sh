@@ -132,7 +132,7 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 test_cleanup() {
 	kill -9 $?
 	killall numa_memory_traffic_injector 2>/dev/zero
-
+	killall collect_stats.sh 2>/dev/zero
 	exit
 }
 
