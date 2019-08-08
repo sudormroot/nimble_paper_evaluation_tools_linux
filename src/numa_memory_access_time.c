@@ -145,7 +145,14 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 		perror("numa_alloc_onnode() failed\n");
 		exit(-1);
 	}
-	
+		
+	//warm up
+	for(i = 0; i < size; i++) {
+		*((unsigned char *)(ptr + i)) = rand() % 255;
+		clflush((void*)(ptr + i));
+		mfence();
+	}
+
 
 	aligned_ptr = (void *) ((unsigned long)ptr - (unsigned long)ptr % sizeof(unsigned long));
 
@@ -168,14 +175,6 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	// lfence = load fence
 	// sfence = save fence
 	// mfence = save + load fence
-	
-	//warm up
-	
-	for(i = 0; i < aligned_size; i++) {
-		*(aligned_ptr + i) = rand() % 255;
-		clflush(aligned_ptr + i);
-		mfence();
-	}
 
 	for(i = 0; i < aligned_size / sizeof(unsigned long); i++) {
 
