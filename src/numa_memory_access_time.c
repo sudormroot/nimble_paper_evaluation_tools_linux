@@ -15,6 +15,7 @@
 #include <sched.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <time.h>
 
 #include <numa.h>
 #include <numaif.h>
@@ -167,7 +168,14 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	// lfence = load fence
 	// sfence = save fence
 	// mfence = save + load fence
-	//
+	
+	//warm up
+	
+	for(i = 0; i < aligned_size; i++) {
+		*(aligned_ptr + i) = rand() % 255;
+		clflush(aligned_ptr + i);
+		mfence();
+	}
 
 	for(i = 0; i < aligned_size / sizeof(unsigned long); i++) {
 
@@ -350,6 +358,10 @@ int main(int argc, char **argv)
 	uint64_t c1, c2;
 	int real_secs = 3;
 
+	time_t seed;
+
+	srand((unsigned) time(&seed));
+
 	(void) nice(-20);
 	
 	setbuf(stdout, NULL);
@@ -378,7 +390,7 @@ int main(int argc, char **argv)
 
 	for(cpu_node = 0; cpu_node < nodes_nr; cpu_node++) {
 		for(mem_node = 0; mem_node < nodes_nr; mem_node++) {
-			printf("Measuring on cpu #%d mem #%d\n", cpu_node, mem_node);
+			printf("Measuring cpu #%d mem #%d\n", cpu_node, mem_node);
 			measure_memory_access_time(cpu_node, mem_node);
 		}
 	}
