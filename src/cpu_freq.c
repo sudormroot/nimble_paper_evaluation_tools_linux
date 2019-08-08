@@ -36,7 +36,7 @@ double measure_cpu_freq(void)
 	//in microsecond
 	elapsed = (double)(t2.tv_sec - t1.tv_sec) * 1000000.00;
 
-	+ (double)(t2.tv_usec - t1.tv_usec);
+	//+ (double)(t2.tv_usec - t1.tv_usec);
 
 	if (t2.tv_usec < t1.tv_usec) {
 		t2.tv_usec += 1000000;
