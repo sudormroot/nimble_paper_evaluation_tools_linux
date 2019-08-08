@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 
 		//report for every 1G
 		if(total % ((1 << 30) >> 12) == 0)
-		printf("%.2f total %ld MB memory is occupied on NUMA node #%d\n", 100.00f * ((double) total / (double) size) , (total << 12) >> 20, node);
+		printf("%.2f %% total %ld MB memory is occupied on NUMA node #%d\n", 100.00f * ((double) total / (double) size) , (total << 12) >> 20, node);
 
 	}
 
