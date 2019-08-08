@@ -99,9 +99,12 @@ int main(int argc, char **argv)
 
 		total += 1;
 
+		if(total % ((1 << 20) >> 12) == 0)
 		printf("Total %ld MB memory is occupied on NUMA node #%d\n", (total << 12) >> 20, node);
 
 	}
+
+	printf("Finished, total %ld MB memory is occupied on NUMA node #%d\n", (total << 12) >> 20, node);
 
 	while(1) {
 		sleep(100);
