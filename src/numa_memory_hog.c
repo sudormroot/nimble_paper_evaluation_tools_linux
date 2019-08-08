@@ -99,8 +99,8 @@ int main(int argc, char **argv)
 
 		total += 1;
 
-		//report for every 256MB
-		if(total % ((256 << 20) >> 12) == 0)
+		//report for every 1G
+		if(total % ((1 << 30) >> 12) == 0)
 		printf("Total %ld MB memory is occupied on NUMA node #%d\n", (total << 12) >> 20, node);
 
 	}
