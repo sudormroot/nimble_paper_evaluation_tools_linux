@@ -24,7 +24,7 @@ THP_MIGRATION="x"
 
 
 show_usage() {
-	echo "$0 [--enable-traffic-injection] --thp_migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	echo "$0 [--enable-traffic-injection] --thp-migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
 if [ $# = 0 ];then
@@ -59,7 +59,7 @@ echo "" >> $LOG_FILE
 
 while [ 1 = 1 ] ; do
 	case "$1" in
-		-M|--thp_migration=*) 
+		-M|--thp-migration=*) 
 			THP_MIGRATION=`echo ${1#*=}`
 			echo "THP_MIGRATION=$THP_MIGRATION" | tee -a $LOG_FILE
 			shift 1;;

@@ -27,7 +27,7 @@ if [ ! -f "$python_program" ];then
 	exit
 fi
 
-./launch_testee.sh      --thp_migration=$thp_migration \
+./launch_testee.sh      --thp-migration=$thp_migration \
                         --max-mem-size=$max_mem_size \
                         --fast-mem-size=$fast_mem_size \
                         --migration-threads-num=$threads_num \

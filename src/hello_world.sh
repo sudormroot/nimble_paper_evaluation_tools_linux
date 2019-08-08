@@ -6,5 +6,5 @@
 # Set fast memory size to 128MB
 #
 
-./launch_testee.sh --thp_migration=1 --max-mem-size=2048 --fast-mem-size=128 --migration-threads-num=1 find /usr
+./launch_testee.sh --thp-migration=1 --max-mem-size=2048 --fast-mem-size=128 --migration-threads-num=1 find /usr
 
