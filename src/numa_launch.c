@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 
 
 	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
-		usage();
+		usage(argv[0]);
 		exit(0);
 	}
 
