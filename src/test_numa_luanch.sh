@@ -4,7 +4,7 @@ sudo mkdir /sys/fs/cgroup/test 2>/dev/zero
 
 FAST_MEM_SIZE="$1"
 FAST_NODE=1
-SLOW_NODE=0
+#SLOW_NODE=0
 
 if [ "$FAST_MEM_SIZE" = "" ];then
 	echo "$0 <fastmem-size-in-mb>"
@@ -20,4 +20,4 @@ echo "$$" | sudo tee /sys/fs/cgroup/$CGROUP/cgroup.procs
 echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $$" 
 
 #sudo ./numa_launch --cgroup=/sys/fs/cgroup/test --cpu-node=1 --fast-mem-size=$memsize --fast-mem-node=1 --slow-mem-node=0 -- python ~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=10
-./numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE -- python ~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=10
+./numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- python ~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=10

@@ -23,14 +23,14 @@
 #define MPOL_F_MEMCG    (1<<13)
 
 struct bitmask *fastmem_mask = NULL;
-struct bitmask *slowmem_mask = NULL;
+//struct bitmask *slowmem_mask = NULL;
 struct bitmask *cpu_mask = NULL;
 
 static int fastmem_node = -1;
-static int slowmem_node = -1;
+//static int slowmem_node = -1;
 static int cpu_node = -1;
 
-static unsigned long fastmem_size = 0;
+//static unsigned long fastmem_size = 0;
 
 static char cgroup[128];
 static char cgroup_procs[256];
@@ -49,7 +49,7 @@ static struct option long_options [] =
 	//{"fast-mem-size", required_argument, 0, 's'},
 
 	{"fast-mem-node", required_argument, 0, 'F'},
-	{"slow-mem-node", required_argument, 0, 'S'},
+	//{"slow-mem-node", required_argument, 0, 'S'},
 
 	{"cpu-node", required_argument, 0, 'C'},
 
@@ -62,7 +62,7 @@ static struct option long_options [] =
 static void usage(const char *appname)
 {
 	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
-	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
+	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node>\n", appname);
 }
 
 void child_exit(int sig, siginfo_t *siginfo, void *context)
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 	memset(cgroup, 0, sizeof(cgroup));
 
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
-	while ((c = getopt_long(argc, argv, "F:S:C:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "F:C:", long_options, &option_index)) != -1) {
 
 		switch (c) {
 			//case 's':
@@ -116,10 +116,10 @@ int main(int argc, char **argv)
 				fastmem_mask = numa_parse_nodestring(optarg);
 				fastmem_node = atoi(optarg);
 				break;
-			case 'S':
-				slowmem_mask = numa_parse_nodestring(optarg);
-				slowmem_node = atoi(optarg);
-				break;
+			//case 'S':
+			//	slowmem_mask = numa_parse_nodestring(optarg);
+			//	slowmem_node = atoi(optarg);
+			//	break;
 			case 'C':
 				cpu_mask = numa_parse_nodestring(optarg);
 				cpu_node = atoi(optarg);
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 
 
 	//if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
-	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1) {
+	if(fastmem_node == -1 || cpu_node == -1) {
 		usage(argv[0]);
 		exit(0);
 	}
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 #endif
 
 		//printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
-		printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", argv[0], cpu_node, fastmem_size, fastmem_node, slowmem_node);
+		printf("Launch application %s on cpu node #%d fastmem_node #%d  ...\n", argv[0], cpu_node, fastmem_node);
 
 		//free(cmdline);
 
@@ -260,10 +260,12 @@ int main(int argc, char **argv)
 		exit(child_status);
 	}
 
-	printf("Child pid is %d\n", child_pid);
+	printf("Child %s pid is %d\n", argv[0], child_pid);
 
 	while(child_quit == 0)
 		sleep(1);
 
-	return 0;
+	printf("Child %d exited\n", argv[0], child_pid);
+
+	exit(0);
 }

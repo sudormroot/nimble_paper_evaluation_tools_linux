@@ -131,7 +131,11 @@ echo "FAST_NODE=$FAST_NODE" | tee -a $LOG_FILE
 echo "SLOW_NODE=$SLOW_NODE" | tee -a $LOG_FILE
 
 
-APP_CMD="numactl --cpunodebind=$FAST_NODE --preferred=$FAST_NODE $@" 
+PROG_HOME="`dirname $0`"
+
+#APP_CMD="numactl --cpunodebind=$FAST_NODE --preferred=$FAST_NODE $@" 
+APP_CMD="$PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE -- $@" 
+
 
 echo "APP_CMD=$APP_CMD"
 
