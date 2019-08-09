@@ -62,7 +62,7 @@ static struct option long_options [] =
 static void usage(const char *appname)
 {
 	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
-	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node>\n", appname);
+	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> -- <cmd> <arg1> ...\n", appname);
 }
 
 void child_exit(int sig, siginfo_t *siginfo, void *context)
@@ -96,9 +96,22 @@ int main(int argc, char **argv)
 	char *cmdline;
 	int i;
 	int len = 0;
-
+	int found = 0;
 
 	if(argc < 6) {
+		usage(argv[0]);
+		exit(0);
+	}
+
+
+	for(i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "--") == 0 && strlen(argv[i]) == strlen("--")) {
+			found = 1;
+			break;
+		}
+	}
+
+	if(found == 0) {
 		usage(argv[0]);
 		exit(0);
 	}
