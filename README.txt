@@ -7,6 +7,6 @@ $ make clean && make
 
 Launch your application:
 
-./launch_testee.sh [--enable-traffic-injection] --thp-migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ...
+./launch_testee.sh [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ...
 
 

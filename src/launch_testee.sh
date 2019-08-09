@@ -25,10 +25,13 @@ MIGRATION_THREADS_NUM="0"
 ENABLE_TRAFFIC_INJECTION="0"
 THP_MIGRATION="x"
 
+KILL_TIMEOUT="0"
 
+START_UNIXTIME="0"
+CURRENT_UNIXTIME="0"
 
 show_usage() {
-	echo "$0 [--enable-traffic-injection] --thp-migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
 if [ $# = 0 ];then
@@ -44,6 +47,9 @@ fi
 
 while [ 1 = 1 ] ; do
 	case "$1" in
+		-M|--kill-timeout=*) 
+			KILL_TIMEOUT=`echo ${1#*=}`
+			shift 1;;
 		-M|--thp-migration=*) 
 			THP_MIGRATION=`echo ${1#*=}`
 			shift 1;;
@@ -95,7 +101,7 @@ if [ "$MIGRATION_THREADS_NUM" = "0" ]; then
 fi
 
 # Year-Month-Day_Hour-Minute-Second_unixtime-nanoseconds
-RESULT_DIR="test_result-""thp_$THP_MIGRATION""_fastmem_$FAST_MEM_SIZE""MB""_threads_$MIGRATION_THREADS_NUM""-""`date '+%Y-%m-%d_%H-%M-%S_%s-%N'`"
+RESULT_DIR="result_dir-""thp_$THP_MIGRATION""_fastmem_$FAST_MEM_SIZE""MB""_threads_$MIGRATION_THREADS_NUM""-""`date '+%Y-%m-%d_%H-%M-%S_%s-%N'`"
 
 LOG_FILE="$RESULT_DIR""/log.txt"
 STATS_FILE="$RESULT_DIR""/stats.txt"
@@ -111,7 +117,8 @@ if [ ! -d "$RESULT_DIR" ];then
 fi
 
 log_time() {
-	echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" >> $1
+	#echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" >> $1
+	echo "Time: `date '+%Y-%m-%d %H:%M:%S %s %N'`" >> $1
 }
 
 log_time $LOG_FILE
@@ -121,6 +128,9 @@ echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" | tee -a $LOG_FILE
 echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee -a $LOG_FILE
 echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee -a $LOG_FILE
+echo "KILL_TIMEOUT=$KILL_TIMEOUT" | tee -a $LOG_FILE
+echo "FAST_NODE=$FAST_NODE" | tee -a $LOG_FILE
+echo "SLOW_NODE=$SLOW_NODE" | tee -a $LOG_FILE
 
 
 APP_CMD="numactl --cpunodebind=$FAST_NODE --preferred=$FAST_NODE $@" 
@@ -186,7 +196,17 @@ collect_stats(){
 handle_signal_ALRM() {
 	collect_stats
 	sleep $STATS_COLLECT_INTERVAL
-	kill -ALRM $$
+
+	CURRENT_UNIXTIME="`date '+%s'`"
+
+	diff="`expr $CURRENT_UNIXTIME - $START_UNIXTIME`"
+
+	if [ $diff -gt $KILL_TIMEOUT ] && [ $KILL_TIMEOUT -gt 0 ];then
+		echo "Running time is out, time to stop ..."
+		test_cleanup
+	else
+		kill -ALRM $$
+	fi
 }
 
 trap "handle_signal_ALRM" ALRM
@@ -263,6 +283,7 @@ log_time $LOG_FILE
 #
 stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE &
 
+START_UNIXTIME="`date '+%s'`"
 
 #begin to collect statistics
 kill -ALRM $$

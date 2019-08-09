@@ -27,7 +27,11 @@ if [ ! -f "$python_program" ];then
 	exit
 fi
 
-./launch_testee.sh      --thp-migration=$thp_migration \
+#30 minutes
+kill_timeout="`expr 30 * 60`"
+
+./launch_testee.sh      --kill-timeout=$kill_timeout \
+						--thp-migration=$thp_migration \
                         --max-mem-size=$max_mem_size \
                         --fast-mem-size=$fast_mem_size \
                         --migration-threads-num=$threads_num \
