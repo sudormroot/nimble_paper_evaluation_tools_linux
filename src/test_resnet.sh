@@ -52,12 +52,12 @@ for memsize in $FASTMEM_SIZE_LIST; do
 	./launch_testee.sh      --thp-migration=0 \
             	            --fast-mem-size=$memsize \
                 	        --migration-threads-num=$PER_NODE_THREADS \
-                    	    python $program
+                    	    python $program "--version=test_fastmemsize_$memsize""_MB_thp_0"
 
 	./launch_testee.sh      --thp-migration=1 \
             	            --fast-mem-size=$memsize \
                 	        --migration-threads-num=$PER_NODE_THREADS \
-                    	    python $program
+                    	    python $program "--version=test_fastmemsize_$memsize""_MB_thp_1"
 done
 
 

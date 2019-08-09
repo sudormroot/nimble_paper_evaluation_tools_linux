@@ -145,13 +145,13 @@ test_cleanup() {
 
 	echo "Kill $appname ..."
 
-	killall $appname 2>/dev/zero
+	sudo killall $appname 2>/dev/zero
 	sleep 2
-	killall -9 $appname 2>/dev/zero
+	sudo killall -9 $appname 2>/dev/zero
 
 	echo "Kill numa_memory_traffic_injector ..."
 	#kill -9 $! 2>/dev/zero
-	killall numa_memory_traffic_injector 2>/dev/zero
+	sudo killall numa_memory_traffic_injector 2>/dev/zero
 
 	echo "Remove /sys/fs/cgroup/$CGROUP ..."
 	sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
