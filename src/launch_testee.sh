@@ -215,7 +215,7 @@ handle_signal_ALRM() {
 	
 	child_pids="`jobs -p`"
 
-	if [ "$child_pids" != "" ]; then
+	if [ "$child_pids" = "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
 		echo "START_UNIXTIME=$START_UNIXTIME" | tee -a $LOG_FILE
 		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
