@@ -271,10 +271,11 @@ echo "+memory" | sudo tee /sys/fs/cgroup/cgroup.subtree_control
 
 if [ "$MAX_MEM_SIZE" != "0" ];then
 	MAX_MEM_SIZE_BYTES="`expr $MAX_MEM_SIZE \\* 1024 \\* 1024`"
-
-	echo "$MAX_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max
-	echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
+else
+	MAX_MEM_SIZE_BYTES="max"
 fi
+
+echo "$MAX_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max
 
 sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
