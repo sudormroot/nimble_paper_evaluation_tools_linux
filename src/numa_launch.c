@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 	term_sigact.sa_sigaction = term_signal;
 	term_sigact.sa_flags = SA_SIGINFO;
 
-	if (sigaction(SIGTERM, &kill_sigact, NULL) < 0) {
+	if (sigaction(SIGTERM, &term_sigact, NULL) < 0) {
 		perror("failed sigaction SIGTERM\n");
 		exit(-1);
 	}
