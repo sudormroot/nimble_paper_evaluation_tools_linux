@@ -140,9 +140,24 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 test_cleanup() {
-	sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
-	kill -9 $! 2>/dev/zero
+	appname="`echo $APP_CMD|cut -d' ' -f4`"
+	appname="`basename $appname`"
+
+	echo "Kill $appname ..."
+
+	killall $appname 2>/dev/zero
+	sleep 2
+	killall -9 $appname 2>/dev/zero
+
+	echo "Kill numa_memory_traffic_injector ..."
+	#kill -9 $! 2>/dev/zero
 	killall numa_memory_traffic_injector 2>/dev/zero
+
+	echo "Remove /sys/fs/cgroup/$CGROUP ..."
+	sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
+
+	echo "Cleanup finished."
+
 	exit
 }
 
