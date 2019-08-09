@@ -259,7 +259,7 @@ handle_signal_ALRM() {
 
 	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
 
-	echo "numa_launch_pid=$numa_launch_pid"
+	#echo "numa_launch_pid=$numa_launch_pid"
 
 	appname="`echo $APP_CMD|cut -d' ' -f5`"
 
@@ -278,7 +278,7 @@ handle_signal_ALRM() {
 
 	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
 
-	echo "appname=$appname check_child_status=$check_child_status"
+	#echo "appname=$appname check_child_status=$check_child_status"
 
 	if [ "$check_child_status" = "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
