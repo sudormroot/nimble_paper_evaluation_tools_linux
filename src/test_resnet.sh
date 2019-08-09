@@ -37,7 +37,10 @@ FASTMEM_SIZE_LIST="`seq 1024 256 4096`"
 
 echo "FASTMEM_SIZE_LIST=$FASTMEM_SIZE_LIST"
 
-program="~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=2000"
+program_home="`echo ~`"
+
+program="$program_home/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=20"
+#program="~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=2000"
 
 
 #num_residual_blocks : int. The total layers of the ResNet = 6 * num residual blocks + 2
