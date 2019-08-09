@@ -46,18 +46,20 @@ program="$program_home/resnet-in-tensorflow/cifar10_train.py --num_residual_bloc
 
 for memsize in $FASTMEM_SIZE_LIST; do
 
-	echo "memsize=$memsize MB"
+	echo "fastmemsize=$memsize MB thp=0"
 
 	#--kill-timeout=$kill_timeout
 	./launch_testee.sh      --thp-migration=0 \
             	            --fast-mem-size=$memsize \
                 	        --migration-threads-num=$PER_NODE_THREADS \
-                    	    python $program "--version=test_fastmemsize_$memsize""_MB_thp_0"
+                    	    python $program "--version=test_fastmem_$memsize""_MB_thp_0"
+
+	echo "fastmemsize=$memsize MB thp=1"
 
 	./launch_testee.sh      --thp-migration=1 \
             	            --fast-mem-size=$memsize \
                 	        --migration-threads-num=$PER_NODE_THREADS \
-                    	    python $program "--version=test_fastmemsize_$memsize""_MB_thp_1"
+                    	    python $program "--version=test_fastmem_$memsize""_MB_thp_1"
 done
 
 
