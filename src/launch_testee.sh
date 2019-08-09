@@ -215,7 +215,13 @@ handle_signal_ALRM() {
 	
 	child_pids="`jobs -p`"
 
-	if [ "$child_pids" = "" ]; then
+	appname="`echo $APP_CMD|cut -d' ' -f4`"
+
+	check_child_status="`ps --ppid $$|grep $appname|awk '{print $1}'`"
+
+	#check_child_status="`echo $check_child_status`"
+
+	if [ "$check_child_status" = "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
 		echo "START_UNIXTIME=$START_UNIXTIME" | tee -a $LOG_FILE
 		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
