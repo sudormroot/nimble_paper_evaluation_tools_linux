@@ -213,7 +213,7 @@ collect_stats(){
 	cat /proc/vmstat >> $STATS_FILE
 	echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/$$/page_migration_stats"
+	echo "CMD=cat /proc/$$/page_migration_stats" >> $STATS_FILE
 	cat /proc/$$/page_migration_stats >> $STATS_FILE
 	echo "" >> $STATS_FILE
 }
