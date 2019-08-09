@@ -10,6 +10,8 @@ result_dir="$1"
 
 training_speed_list="`cat $result_dir/applog.txt |grep examples|awk '{print $8}'|sed 's/(//g'`"
 
+fastmem_size="`cat $result_dir/config.txt |grep FAST_MEM_SIZE|cut -d= -f2`"
+
 min="0"
 max="0"
 avg="0"
@@ -35,5 +37,5 @@ done
 
 avg="`echo $sum / $n | bc`"
 
-echo "min=$min max=$max avg=$avg"
+echo "fastmem_size=$fastmem_size MB, training speed min=$min max=$max avg=$avg"
 
