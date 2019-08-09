@@ -140,14 +140,21 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 test_cleanup() {
-	appname="`echo $APP_CMD|cut -d' ' -f4`"
-	appname="`basename $appname`"
+	#appname="`echo $APP_CMD|cut -d' ' -f4`"
+	#appname="`basename $appname`"
 
-	echo "Kill $appname ..."
+	#echo "Kill $appname ..."
 
-	sudo killall $appname 2>/dev/zero
-	sleep 2
-	sudo killall -9 $appname 2>/dev/zero
+	#sudo killall $appname 2>/dev/zero
+	#sleep 2
+	#sudo killall -9 $appname 2>/dev/zero
+	
+	if [ "$!" != "" ]; then
+		echo "Kill child pid $! ..."
+		kill $!
+		sleep 2
+		kill -9 $!
+	fi
 
 	echo "Kill numa_memory_traffic_injector ..."
 	#kill -9 $! 2>/dev/zero
@@ -203,8 +210,16 @@ handle_signal_ALRM() {
 	sleep $STATS_COLLECT_INTERVAL
 
 	CURRENT_UNIXTIME="`date '+%s'`"
-
 	diff="`expr $CURRENT_UNIXTIME - $START_UNIXTIME`"
+
+	if [ "$!" != "" ]; then
+		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
+		echo "START_UNIXTIME=$START_UNIXTIME" | tee -a $LOG_FILE
+		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
+		echo "Elapsed $diff seconds" | tee -a $LOG_FILE
+		echo "call test_cleanup() to gracefully stop running ..." | tee -a $LOG_FILE
+		test_cleanup
+	fi
 
 	if [ $diff -gt $KILL_TIMEOUT ] && [ $KILL_TIMEOUT -gt 0 ];then
 		echo "Running time is out, time to stop ..." | tee -a $LOG_FILE
