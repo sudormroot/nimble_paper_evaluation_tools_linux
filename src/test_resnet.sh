@@ -11,10 +11,10 @@ CPUS_NUM="`cat /proc/cpuinfo|grep processor|wc -l`"
 thp_migration=0
 
 MEM_SIZE="`cat /proc/meminfo |grep MemTotal|cut -d: -f2|cut -dk -f1`"
-MEM_SIZE="`expr $MEM_SIZE / 1024`"
+#MEM_SIZE="`expr $MEM_SIZE / 1024`"
 
 
-echo "Detected memory size: $MEM_SIZE MB"
+#echo "Detected memory size: $MEM_SIZE MB"
 echo "Detected cpus       : $CPUS_NUM"
 
 
@@ -25,11 +25,11 @@ echo "Detected cpus       : $CPUS_NUM"
 
 
 PER_NODE_THREADS="`expr $CPUS_NUM / 2`"
-PER_NODE_MEM_SIZE="`expr $MEM_SIZE / 2`"
+#PER_NODE_MEM_SIZE="`expr $MEM_SIZE / 2`"
 
 
 echo "PER_NODE_THREADS=$PER_NODE_THREADS"
-echo "PER_NODE_MEM_SIZE=$PER_NODE_MEM_SIZE"
+#echo "PER_NODE_MEM_SIZE=$PER_NODE_MEM_SIZE"
 
 #1G 2G 3G
 FASTMEM_SIZE_LIST="`seq 1024 256 4096`"
@@ -44,15 +44,15 @@ program="~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --repor
 
 for memsize in $FASTMEM_SIZE_LIST; do
 
+	echo "memsize=$memsize MB"
+
 	#--kill-timeout=$kill_timeout
 	./launch_testee.sh      --thp-migration=0 \
-        	                --max-mem-size=$MEM_SIZE \
             	            --fast-mem-size=$memsize \
                 	        --migration-threads-num=$CPUS_NUM \
                     	    python $program
 
 	./launch_testee.sh      --thp-migration=1 \
-        	                --max-mem-size=$MEM_SIZE \
             	            --fast-mem-size=$memsize \
                 	        --migration-threads-num=$CPUS_NUM \
                     	    python $program
