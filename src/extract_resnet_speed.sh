@@ -9,8 +9,9 @@ echo ""
 extract_data_one_dir(){
 	result_dir="$1"
 
-	training_speed_list="`cat $result_dir/applog.txt |grep examples|awk '{print $8}'|sed 's/(//g'|sed '1d'`"
-	fastmem_size="`cat $result_dir/config.txt |grep FAST_MEM_SIZE|cut -d= -f2`"
+	training_speed_list="`cat $result_dir/applog.txt | grep examples | awk '{print $8}'|sed 's/(//g'|sed '1d'`"
+	fastmem_size="`cat $result_dir/config.txt | grep FAST_MEM_SIZE|cut -d= -f2`"
+	thp_migration="`cat $result_dir/config.txt | grep THP_MIGRATION|cut -d= -f2`"
 
 	min="0"
 	max="0"
@@ -37,7 +38,7 @@ extract_data_one_dir(){
 
 	avg="`echo $sum / $n | bc`"
 
-	echo "fastmem_size=$fastmem_size MB, training speed min=$min max=$max avg=$avg"
+	echo "thp_migration=$thp_migration, fastmem_size=$fastmem_size MB, training speed min=$min max=$max avg=$avg"
 }
 
 for dir in $result_dirs_list;do
