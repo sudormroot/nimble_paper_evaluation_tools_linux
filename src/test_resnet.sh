@@ -39,8 +39,7 @@ echo "FASTMEM_SIZE_LIST=`echo $FASTMEM_SIZE_LIST`"
 
 program_home="`echo ~`"
 
-program="$program_home/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=20"
-#program="~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=2000"
+program="$program_home/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=2000"
 
 
 #num_residual_blocks : int. The total layers of the ResNet = 6 * num residual blocks + 2
@@ -52,12 +51,12 @@ for memsize in $FASTMEM_SIZE_LIST; do
 	#--kill-timeout=$kill_timeout
 	./launch_testee.sh      --thp-migration=0 \
             	            --fast-mem-size=$memsize \
-                	        --migration-threads-num=$CPUS_NUM \
+                	        --migration-threads-num=$PER_NODE_THREADS \
                     	    python $program
 
 	./launch_testee.sh      --thp-migration=1 \
             	            --fast-mem-size=$memsize \
-                	        --migration-threads-num=$CPUS_NUM \
+                	        --migration-threads-num=$PER_NODE_THREADS \
                     	    python $program
 done
 
