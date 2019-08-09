@@ -1,6 +1,16 @@
 #!/bin/bash
 
 
+
+#
+# Fast node is #1
+# Slow node is #0
+#
+
+SLOW_NODE=0
+FAST_NODE=1
+
+
 CGROUP="test"
 
 
@@ -85,7 +95,7 @@ if [ "$MIGRATION_THREADS_NUM" = "0" ]; then
 fi
 
 # Year-Month-Day_Hour-Minute-Second_unixtime-nanoseconds
-RESULT_DIR="test_result-""thp_$THP_MIGRATION""_fastmem_$FAST_MEM_SIZE""MB""_threads_$MIGRATION_THREADS_NUM""_""`date '+%Y-%m-%d_%H-%M-%S_%s-%N'`"
+RESULT_DIR="test_result-""thp_$THP_MIGRATION""_fastmem_$FAST_MEM_SIZE""MB""_threads_$MIGRATION_THREADS_NUM""-""`date '+%Y-%m-%d_%H-%M-%S_%s-%N'`"
 
 LOG_FILE="$RESULT_DIR""/log.txt"
 STATS_FILE="$RESULT_DIR""/stats.txt"
@@ -113,7 +123,7 @@ echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee -a $LOG_FILE
 
 
-APP_CMD="numactl --cpunodebind=0 --preferred=0 $@" 
+APP_CMD="numactl --cpunodebind=$FAST_NODE --preferred=$FAST_NODE $@" 
 
 echo "APP_CMD=$APP_CMD"
 
@@ -133,7 +143,6 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 test_cleanup() {
 	kill -9 $?
 	killall numa_memory_traffic_injector 2>/dev/zero
-	killall collect_stats.sh 2>/dev/zero
 	exit
 }
 
@@ -207,8 +216,8 @@ sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
 
 
-sudo echo "$FAST_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:0
-echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $FAST_MEM_SIZE MB" | tee -a $LOG_FILE
+sudo echo "$FAST_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE
+echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE to $FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 
 sudo sysctl vm/limit_mt_num=$MIGRATION_THREADS_NUM
 echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee -a $LOG_FILE
@@ -234,16 +243,12 @@ inject_traffic() {
 		make 
 	fi
 
-	./numa_memory_traffic_injector --cpu-node=1 --mem-node=1 --mem-size=128 --thread-num=8 &
+	./numa_memory_traffic_injector --cpu-node=$SLOW_NODE --mem-node=$SLOW_NODE --mem-size=256 --thread-num=16 &
 }
 
 if  [ "$ENABLE_TRAFFIC_INJECTION" = "1" ];then 
 	inject_traffic
 fi
-
-#############################################
-#   Start testing                           #
-#############################################
 
 #############################################
 #   Start testing                           #
