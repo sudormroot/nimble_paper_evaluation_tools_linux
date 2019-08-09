@@ -263,7 +263,7 @@ echo "Set maximum open files to $MAX_OPEN_FILES"
 # remove old, if exists
 sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 
-# create customized control-group named two-level-memory
+# create customized control-group 
 sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 
 # enable memory control
