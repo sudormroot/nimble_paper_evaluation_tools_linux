@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 	child_pid = fork();
 
 	if(child_pid == 0) {
-
+#if 0
 		//set cgroup.procs
 		
 		(void)snprintf(cgroup_procs, sizeof(cgroup_procs), "%s/cgroup.procs", cgroup);
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 		}
 
 		close(fd);
-
+#endif
 
 		if (numa_run_on_node_mask_all(cpu_mask) < 0) {
 			fprintf(stderr, "failed to bind on numa node #%d\n", cpu_node);
