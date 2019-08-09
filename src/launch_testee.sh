@@ -19,6 +19,8 @@ MAX_OPEN_FILES=100000
 DROP_CACHES_INTERVAL=3	    #drop caches for every 3 seconds	
 STATS_COLLECT_INTERVAL=5    #collect system statistics every 5 seconds
 
+MIGRATION_BATCH_SIZE=8
+
 MAX_MEM_SIZE="0"
 FAST_MEM_SIZE="0"
 MIGRATION_THREADS_NUM="0"
@@ -30,8 +32,12 @@ KILL_TIMEOUT="0"
 START_UNIXTIME="0"
 CURRENT_UNIXTIME="0"
 
+
+PROG_HOME="`dirname $0`"
+
 show_usage() {
-	echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	#echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	echo "$0 [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
 if [ $# = 0 ];then
@@ -160,9 +166,9 @@ test_cleanup() {
 	done
 
 
-	echo "Kill numa_memory_traffic_injector ..."
+	#echo "Kill numa_memory_traffic_injector ..."
 	#kill -9 $! 2>/dev/zero
-	sudo killall numa_memory_traffic_injector 2>/dev/zero
+	#sudo killall numa_memory_traffic_injector 2>/dev/zero
 
 	echo "Remove /sys/fs/cgroup/$CGROUP ..."
 	sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
@@ -206,6 +212,10 @@ collect_stats(){
 	echo "CMD=cat /proc/vmstat" >> $STATS_FILE
 	cat /proc/vmstat >> $STATS_FILE
 	echo "" >> $STATS_FILE
+
+	echo "CMD=cat /proc/$$/page_migration_stats"
+	cat /proc/$$/page_migration_stats >> $STATS_FILE
+	echo "" >> $STATS_FILE
 }
 
 
@@ -221,6 +231,8 @@ handle_signal_ALRM() {
 	appname="`echo $APP_CMD|cut -d' ' -f4`"
 
 	check_child_status="`ps --ppid $$|grep $appname|awk '{print $1}'`"
+
+	$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
 
 	#check_child_status="`echo $check_child_status`"
 
@@ -281,6 +293,9 @@ sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
 
 
+sudo sysctl vm/migration_batch_size=$MIGRATION_BATCH_SIZE
+echo "Set vm/migration_batch_size=$MIGRATION_BATCH_SIZE"
+
 FAST_MEM_SIZE_BYTES="`expr $FAST_MEM_SIZE \\* 1024 \\* 1024`"
 
 echo "$FAST_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE
@@ -302,20 +317,20 @@ echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
 #   slow NUMA node #1                       #
 #############################################
 
-inject_traffic() {
-	echo "Inject traffic to slow memory on NUMA node #1 ..." | tee -a $LOG_FILE
-
-	if [ ! -f "numa_memory_traffic_injector" ]; then
-		echo "numa_memory_traffic_injector not found, try make" | tee -a $LOG_FILE
-		make 
-	fi
-
-	./numa_memory_traffic_injector --cpu-node=$SLOW_NODE --mem-node=$SLOW_NODE --mem-size=256 --thread-num=16 &
-}
-
-if  [ "$ENABLE_TRAFFIC_INJECTION" = "1" ];then 
-	inject_traffic
-fi
+#inject_traffic() {
+#	echo "Inject traffic to slow memory on NUMA node #1 ..." | tee -a $LOG_FILE
+#
+#	if [ ! -f "numa_memory_traffic_injector" ]; then
+#		echo "numa_memory_traffic_injector not found, try make" | tee -a $LOG_FILE
+#		make 
+#	fi
+#
+#	$PROG_HOME/numa_memory_traffic_injector --cpu-node=$SLOW_NODE --mem-node=$SLOW_NODE --mem-size=256 --thread-num=16 &
+#}
+#
+#if  [ "$ENABLE_TRAFFIC_INJECTION" = "1" ];then 
+#	inject_traffic
+#fi
 
 #############################################
 #   Start testing                           #

@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 
 
 
-	if (	thp_migration + concur_migration + opt_migration + \
+	if (	thp_migration + concur_migration + opt_migration + 
 			basic_exchange_pages + concur_only_exchange_pages + exchange_pages > 1) {
 		perror("--thp-migration|--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages can be used one of them at one time\n");
 		exit(-1);
@@ -191,11 +191,12 @@ int main(int argc, char **argv)
 
 	max_nodes = numa_num_possible_nodes();
 
-	printf("Trigger page migration pid = %d %d -> %d...\n", pid, slowmem_node, fastmem_node);
+	//printf("Trigger page migration pid = %d %d -> %d...\n", pid, slowmem_node, fastmem_node);
 
 	ret = syscall(syscall_mm_manage, pid, managed_pages, max_nodes + 1, slowmem_mask->maskp, fastmem_mask->maskp, mm_manage_flags);
 
-	printf("Page migration done pid = %d, ret = %d\n", pid, ret);
+	if(ret)
+		fprintf(stderr, "Page migration failed pid = %d, ret = %d\n", pid, ret);
 
 	return ret;
 }
