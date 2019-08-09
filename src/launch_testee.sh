@@ -106,6 +106,12 @@ LOG_FILE="$RESULT_DIR""/log.txt"
 STATS_FILE="$RESULT_DIR""/stats.txt"
 APPLOG_FILE="$RESULT_DIR""/applog.txt"
 CONFIG_FILE="$RESULT_DIR""/config.txt"
+FINISH_FILE="$RESULT_DIR""/__finished__"
+
+if [ -f "$FINISH_FILE" ];then
+	#just skip
+	exit
+fi
 
 if [ ! -d "$RESULT_DIR" ];then
 	mkdir $RESULT_DIR 2>/dev/zero
@@ -246,6 +252,7 @@ handle_signal_ALRM() {
 		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
 		echo "Elapsed $diff seconds" | tee -a $LOG_FILE
 		echo "call test_cleanup() to gracefully stop running ..." | tee -a $LOG_FILE
+		touch $FINISH_FILE
 		test_cleanup
 	fi
 
