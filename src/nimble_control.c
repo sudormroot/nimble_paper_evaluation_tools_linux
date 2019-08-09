@@ -47,6 +47,8 @@ static int concur_only_exchange_pages=0;
 static int exchange_pages=0;
 static int hot_and_cold_pages=0;
 static int shrink_page_lists=0;
+static int move_hot_and_cold_pages=0;
+
 
 static int pid = 0;
 
@@ -59,11 +61,11 @@ static struct option long_options [] =
 
 	{"managed-pages", required_argument, 0, 'P'},
 
-	{"nomigration", no_argument, &no_migration, 'N'},
+	{"nomigration", no_argument, 0, 'N'},
 
 	{"non-thp-migration", no_argument, 0, 't'},
 
-	{"thp-migration", no_argument, NULL, 'T'},
+	{"thp-migration", no_argument, 0, 'T'},
 
 	{"concur-migration", no_argument, 0, 'C'},
 	{"opt-migration", no_argument, 0, 'o'},
@@ -79,7 +81,7 @@ static struct option long_options [] =
 
 static void usage(const char *appname)
 {
-	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> [--max-pages] \\\n");
+	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> [--max-pages] \\\n", appname);
 	printf("		--non-thp-migration|--thp-migration \\\n");
 	printf("		[--nomigration|--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages|--move-hot-and-cold-pages|--shrink-page-lists]\n");
 }
@@ -96,7 +98,7 @@ int main(int argc, char **argv)
 	setbuf(stdout, NULL);
 
 	if(argc < 5) {
-		usage();
+		usage(argv[0]);
 		exit(0);
 	}
 
@@ -155,7 +157,7 @@ int main(int argc, char **argv)
 
 	if (	thp_migration + concur_migration + opt_migration + \
 			basic_exchange_pages + concur_only_exchange_pages + exchange_pages > 1) {
-		perror(stderr, "--thp-migration|--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages can be used one of them at one time\n");
+		perror("--thp-migration|--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages can be used one of them at one time\n");
 		exit(-1);
 	}
 
@@ -191,7 +193,7 @@ int main(int argc, char **argv)
 
 	printf("Trigger page migration pid = %d %d -> %d...\n", pid, slowmem_node, fastmem_node);
 
-	ret = syscall(syscall_mm_manage, pid, managed_pages, max_nodes + 1, slow_mem_mask->maskp, fast_mem_mask->maskp, mm_manage_flags);
+	ret = syscall(syscall_mm_manage, pid, managed_pages, max_nodes + 1, slowmem_mask->maskp, fastmem_mask->maskp, mm_manage_flags);
 
 	printf("Page migration done pid = %d, ret = %d\n", pid, ret);
 
