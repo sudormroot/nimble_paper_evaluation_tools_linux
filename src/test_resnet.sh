@@ -19,13 +19,9 @@ echo "Detected cpus       : $CPUS_NUM"
 
 
 
-if [ ! -f "$python_program" ];then
-	echo "$python_program not found"
-	exit
-fi
 
 #30 minutes
-kill_timeout="`expr 30 * 60`"
+#kill_timeout="`expr 30 * 60`"
 
 
 PER_NODE_THREADS="`expr $CPUS_NUM / 2`"
