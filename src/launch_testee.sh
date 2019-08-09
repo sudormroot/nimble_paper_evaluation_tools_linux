@@ -233,7 +233,7 @@ sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
 
 
-FAST_MEM_SIZE_BYTES="`expr $FAST_MEM_SIZE \\* 1024`"
+FAST_MEM_SIZE_BYTES="`expr $FAST_MEM_SIZE \\* 10224 \\* 1024`"
 
 echo "$FAST_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE
 echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE to $FAST_MEM_SIZE MB" | tee -a $LOG_FILE
