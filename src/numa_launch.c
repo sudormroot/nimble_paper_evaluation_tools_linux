@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 
 	char *cmdline;
 
-	if(argc != 5) {
+	if(argc < 5) {
 		usage(argv[0]);
 		exit(0);
 	}
