@@ -9,7 +9,7 @@ echo ""
 extract_data_one_dir(){
 	result_dir="$1"
 
-	training_speed_list="`cat $result_dir/applog.txt |grep examples|awk '{print $8}'|sed 's/(//g'`"
+	training_speed_list="`cat $result_dir/applog.txt |grep examples|awk '{print $8}'|sed 's/(//g'|sed '1d'`"
 	fastmem_size="`cat $result_dir/config.txt |grep FAST_MEM_SIZE|cut -d= -f2`"
 
 	min="0"
@@ -26,7 +26,7 @@ extract_data_one_dir(){
                 min="$x"
         fi
 
-        if [ "$max" = "0" ] || [ "$max" \< "$x" ];then
+        if [ "$max" = "0" ] || [ "$max" \> "$x" ];then
                 max="$x"
         fi
 
