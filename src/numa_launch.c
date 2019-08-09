@@ -46,14 +46,14 @@ static pid_t child_pid = 0;
 static struct option long_options [] = 
 {
 
-	{"fast-mem-size", required_argument, 0, 's'},
+	//{"fast-mem-size", required_argument, 0, 's'},
 
 	{"fast-mem-node", required_argument, 0, 'F'},
 	{"slow-mem-node", required_argument, 0, 'S'},
 
 	{"cpu-node", required_argument, 0, 'C'},
 
-	{"cgroup", required_argument, 0, 'c'},
+	//{"cgroup", required_argument, 0, 'c'},
 
 	{0,0,0,0}
 };
@@ -61,7 +61,8 @@ static struct option long_options [] =
 
 static void usage(const char *appname)
 {
-	printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
+	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
+	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 }
 
 void child_exit(int sig, siginfo_t *siginfo, void *context)
@@ -104,12 +105,13 @@ int main(int argc, char **argv)
 
 	memset(cgroup, 0, sizeof(cgroup));
 
-	while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
+	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "F:S:C:", long_options, &option_index)) != -1) {
 
 		switch (c) {
-			case 's':
-				fastmem_size = atol(optarg);
-				break;
+			//case 's':
+			//	fastmem_size = atol(optarg);
+			//	break;
 			case 'F':
 				fastmem_mask = numa_parse_nodestring(optarg);
 				fastmem_node = atoi(optarg);
@@ -122,16 +124,17 @@ int main(int argc, char **argv)
 				cpu_mask = numa_parse_nodestring(optarg);
 				cpu_node = atoi(optarg);
 				break;
-			case 'c':
-				(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
-				break;
+			//case 'c':
+			//	(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
+			//	break;
 			default:
 				abort();
 		}
 	}
 
 
-	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
+	//if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
+	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1) {
 		usage(argv[0]);
 		exit(0);
 	}
@@ -219,6 +222,7 @@ int main(int argc, char **argv)
 			exit(-1);
 		}
 
+#if 0
 		len = 0;
 
 		for(i = 0; i < argc; i++) {
@@ -242,10 +246,12 @@ int main(int argc, char **argv)
 			len += snprintf(cmdline + len, "%s ", argv[i]);
 			len++;
 		}
+#endif
 
-		printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
+		//printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
+		printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", argv[0], cpu_node, fastmem_size, fastmem_node, slowmem_node);
 
-		free(cmdline);
+		//free(cmdline);
 
 		child_status = execvp(argv[0], argv);
 
