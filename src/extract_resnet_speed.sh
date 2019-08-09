@@ -1,12 +1,6 @@
 #!/bin/sh
 
 
-if [ "$1" = "" ];then
-        echo "$0 <result-dir>"
-        exit
-fi
-
-
 result_dirs_list="`echo result_dir-*`"
 
 
