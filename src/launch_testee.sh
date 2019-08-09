@@ -245,11 +245,18 @@ handle_signal_ALRM() {
 	CURRENT_UNIXTIME="`date '+%s'`"
 	diff="`expr $CURRENT_UNIXTIME - $START_UNIXTIME`"
 	
-	child_pids="`jobs -p`"
+	#child_pids="`jobs -p`"
 
 	appname="`echo $APP_CMD|cut -d' ' -f5`"
 
 	check_child_status="`ps --ppid $$|grep $appname|awk '{print $1}'`"
+
+	ps --ppid $$
+	echo ""
+	ps --ppid $$|grep $appname
+	echo ""
+	ps --ppid $$|grep $appname|awk '{print $1}'
+	echo ""
 
 	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
 
