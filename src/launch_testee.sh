@@ -3,12 +3,6 @@
 
 CGROUP="test"
 
-RESULT_DIR="test_result_dir-""`date '+%Y%m%d_%H-%M-%S_%s-%N'`"
-
-LOG_FILE="$RESULT_DIR""/log.txt"
-STATS_FILE="$RESULT_DIR""/stats.txt"
-APPLOG_FILE="$RESULT_DIR""/applog.txt"
-CONFIG_FILE="$RESULT_DIR""/config.txt"
 
 MAX_OPEN_FILES=100000
 
@@ -33,25 +27,6 @@ if [ $# = 0 ];then
 fi
 
 
-if [ ! -d "$RESULT_DIR" ];then
-	mkdir $RESULT_DIR 2>/dev/zero
-	echo "" >  $LOG_FILE
-	echo "" >  $STATS_FILE
-	echo "" >  $APPLOG_FILE
-	echo "" >  $CONFIG_FILE
-fi
-
-log_time() {
-	echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" >> $1
-}
-
-
-echo "CMD : $0 $*" | tee -a $LOG_FILE
-log_time $LOG_FILE
-echo "" >> $LOG_FILE
-
-
-
 
 #############################################
 #   Get parameters                          #
@@ -61,23 +36,18 @@ while [ 1 = 1 ] ; do
 	case "$1" in
 		-M|--thp-migration=*) 
 			THP_MIGRATION=`echo ${1#*=}`
-			echo "THP_MIGRATION=$THP_MIGRATION" | tee -a $LOG_FILE
 			shift 1;;
 		-i|--enable-traffic-injection) 
 			ENABLE_TRAFFIC_INJECTION=1
-			echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" | tee -a $LOG_FILE
 			shift 1;;
 		-M|--max-mem-size=*) 
 			MAX_MEM_SIZE=`echo ${1#*=}`
-			echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee -a $LOG_FILE
 			shift 1;;
 		-m|--fast-mem-size=*) 
 			FAST_MEM_SIZE=`echo ${1#*=}`
-			echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 			shift 1;;
 		-t|--migration-threads-num*) 
 			MIGRATION_THREADS_NUM=`echo ${1#*=}`
-			echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee -a $LOG_FILE
 			shift 1 ;;
 		--) 
 			shift 1
@@ -86,6 +56,7 @@ while [ 1 = 1 ] ; do
 			break ;;
 	esac
 done
+
 
 if [ "$THP_MIGRATION" != "0" ] && [ "$THP_MIGRATION" != "1" ]; then
 	echo "Required --thp_migration=<1|0>"
@@ -112,6 +83,35 @@ if [ "$MIGRATION_THREADS_NUM" = "0" ]; then
 	show_usage
 	exit
 fi
+
+# Year-Month-Day_Hour-Minute-Second_unixtime-nanoseconds
+RESULT_DIR="test_result-""thp_$THP_MIGRATION""_fastmem_$FAST_MEM_SIZE""MB""_threads_$MIGRATION_THREADS_NUM""_""`date '+%Y-%m-%d_%H-%M-%S_%s-%N'`"
+
+LOG_FILE="$RESULT_DIR""/log.txt"
+STATS_FILE="$RESULT_DIR""/stats.txt"
+APPLOG_FILE="$RESULT_DIR""/applog.txt"
+CONFIG_FILE="$RESULT_DIR""/config.txt"
+
+if [ ! -d "$RESULT_DIR" ];then
+	mkdir $RESULT_DIR 2>/dev/zero
+	echo "" >  $LOG_FILE
+	echo "" >  $STATS_FILE
+	echo "" >  $APPLOG_FILE
+	echo "" >  $CONFIG_FILE
+fi
+
+log_time() {
+	echo "Time [Year-Month-Day Hour:Minute:Second UnixTime Nanoseconds] `date '+%Y-%m-%d %H:%M:%S %s %N'`" >> $1
+}
+
+log_time $LOG_FILE
+
+echo "THP_MIGRATION=$THP_MIGRATION" | tee -a $LOG_FILE
+echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" | tee -a $LOG_FILE
+echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee -a $LOG_FILE
+echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee -a $LOG_FILE
+echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee -a $LOG_FILE
+
 
 APP_CMD="numactl --cpunodebind=0 --preferred=0 $@" 
 
