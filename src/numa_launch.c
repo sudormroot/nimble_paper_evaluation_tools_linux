@@ -117,6 +117,9 @@ int main(int argc, char **argv)
 		}
 	}
 
+	//skip
+	argv += optind;
+
 	child_exit_sigact.sa_sigaction = child_exit;
 
 	child_exit_sigact.sa_flags = SA_SIGINFO;
