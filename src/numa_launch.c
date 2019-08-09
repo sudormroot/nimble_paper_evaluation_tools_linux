@@ -70,9 +70,9 @@ void term_signal(int sig, siginfo_t *siginfo, void *context)
 {
 	int status;
 
-	slee(1);
+	sleep(1);
 	kill(child_pid, SIGTERM);
-	slee(1);
+	sleep(1);
 	kill(child_pid, SIGKILL);
 
 	waitpid(child_pid, &status, WNOHANG);
