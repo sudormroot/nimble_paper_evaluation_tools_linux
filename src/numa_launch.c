@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 
 	while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 
-		printf("c=%d %c option_index=%d optind=%d\n",c,c,option_index, optind)
+		printf("c=%d %c option_index=%d optind=%d\n",c,c,option_index, optind);
 
 		switch (c) {
 			case 's':
