@@ -109,6 +109,8 @@ CONFIG_FILE="$RESULT_DIR""/config.txt"
 FINISH_FILE="$RESULT_DIR""/__finished__"
 
 if [ -f "$FINISH_FILE" ];then
+	echo "Just skip $RESULT_DIR ..."
+	echo "If you still want to test, please remove the file $FINISH_FILE manually ..."
 	#just skip
 	exit
 fi
