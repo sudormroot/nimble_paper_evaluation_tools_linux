@@ -6,19 +6,16 @@
 # Set fast memory size to 128MB
 #
 
-threads_num="`cat /proc/cpuinfo|grep processor|wc -l`"
+CPUS_NUM="`cat /proc/cpuinfo|grep processor|wc -l`"
 
 thp_migration=0
 
-max_mem_size="`cat /proc/meminfo |grep MemTotal|cut -d: -f2|cut -dk -f1`"
-max_mem_size="`expr $max_mem_size / 1024`"
+MEM_SIZE="`cat /proc/meminfo |grep MemTotal|cut -d: -f2|cut -dk -f1`"
+MEM_SIZE="`expr $MEM_SIZE / 1024`"
 
-fast_mem_size=1024
 
-echo "Detected memory size: $max_mem_size MB"
-echo "Detected cpus       : $threads_num"
-
-python_program="~/resnet-in-tensorflow/cifar10_train.py"
+echo "Detected memory size: $MEM_SIZE MB"
+echo "Detected cpus       : $CPUS_NUM"
 
 
 
@@ -30,11 +27,40 @@ fi
 #30 minutes
 kill_timeout="`expr 30 * 60`"
 
-./launch_testee.sh      --kill-timeout=$kill_timeout \
-						--thp-migration=$thp_migration \
-                        --max-mem-size=$max_mem_size \
-                        --fast-mem-size=$fast_mem_size \
-                        --migration-threads-num=$threads_num \
-                        python $python_program
+
+PER_NODE_THREADS="`expr $CPUS_NUM / 2`"
+PER_NODE_MEM_SIZE="`expr $MEM_SIZE / 2`"
+
+
+echo "PER_NODE_THREADS=$PER_NODE_THREADS"
+echo "PER_NODE_MEM_SIZE=$PER_NODE_MEM_SIZE"
+
+#1G 2G 3G
+FASTMEM_SIZE_LIST="`seq 1024 256 4096`"
+
+
+echo "FASTMEM_SIZE_LIST=$FASTMEM_SIZE_LIST"
+
+program="~/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=2000"
+
+
+#num_residual_blocks : int. The total layers of the ResNet = 6 * num residual blocks + 2
+
+for memsize in $FASTMEM_SIZE_LIST; do
+
+	#--kill-timeout=$kill_timeout
+	./launch_testee.sh      --thp-migration=0 \
+        	                --max-mem-size=$MEM_SIZE \
+            	            --fast-mem-size=$memsize \
+                	        --migration-threads-num=$CPUS_NUM \
+                    	    python $program
+
+	./launch_testee.sh      --thp-migration=1 \
+        	                --max-mem-size=$MEM_SIZE \
+            	            --fast-mem-size=$memsize \
+                	        --migration-threads-num=$CPUS_NUM \
+                    	    python $program
+done
+
 
 

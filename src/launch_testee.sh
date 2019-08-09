@@ -202,7 +202,11 @@ handle_signal_ALRM() {
 	diff="`expr $CURRENT_UNIXTIME - $START_UNIXTIME`"
 
 	if [ $diff -gt $KILL_TIMEOUT ] && [ $KILL_TIMEOUT -gt 0 ];then
-		echo "Running time is out, time to stop ..."
+		echo "Running time is out, time to stop ..." | tee -a $LOG_FILE
+		echo "START_UNIXTIME=$START_UNIXTIME" | tee -a $LOG_FILE
+		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
+		echo "Elapsed $diff seconds" | tee -a $LOG_FILE
+		echo "call test_cleanup() to gracefully stop running ..." | tee -a $LOG_FILE
 		test_cleanup
 	else
 		kill -ALRM $$
