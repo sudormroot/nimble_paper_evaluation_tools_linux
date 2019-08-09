@@ -30,8 +30,11 @@ static int fastmem_node = 0;
 static int slowmem_node = 0;
 static int cpu_node = 0;
 
+static unsigned long fastmem_size = 0;
 
+static char cgroup[128];
 static char cgroup_procs[256];
+static char cgroup_max_size[256];
 
 static struct sigaction child_exit_sigact = {0};
 
@@ -42,6 +45,8 @@ static pid_t child_pid = 0;
 
 static struct option long_options [] = 
 {
+
+	{"fast-mem-size", required_argument, 0, 's'},
 
 	{"fast-mem-node", required_argument, 0, 'F'},
 	{"slow-mem-node", required_argument, 0, 'S'},
@@ -56,7 +61,7 @@ static struct option long_options [] =
 
 static void usage(const char *appname)
 {
-	printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
+	printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> --fast-mem-size=<fast-mem-size-in-mb> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 }
 
 void child_exit(int sig, siginfo_t *siginfo, void *context)
@@ -87,15 +92,18 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
-	char *cmdline;
+	//char *cmdline;
 
-	if(argc < 5) {
+	if(argc < 6) {
 		usage(argv[0]);
 		exit(0);
 	}
 
-	while ((c = getopt_long(argc, argv, "F:S:C:c:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 		switch (c) {
+			case 's':
+				fastmem_size = atol(optarg);
+				break;
 			case 'F':
 				fastmem_mask = numa_parse_nodestring(optarg);
 				fastmem_node = atoi(optarg);
@@ -109,8 +117,8 @@ int main(int argc, char **argv)
 				cpu_node = atoi(optarg);
 				break;
 			case 'c':
-				memset(cgroup_procs, 0, sizeof(cgroup_procs));
-				(void)snprintf(cgroup_procs, sizeof(cgroup_procs), "%s/cgroup.procs", optarg);
+				memset(cgroup, 0, sizeof(cgroup));
+				(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
 				break;
 			default:
 				abort();
@@ -133,6 +141,10 @@ int main(int argc, char **argv)
 
 	if(child_pid == 0) {
 
+		//set cgroup.procs
+		
+		(void)snprintf(cgroup_procs, sizeof(cgroup_procs), "%s/cgroup.procs", cgroup);
+
 		fd = open(cgroup_procs, O_RDWR);
 
 		if(fd < 0) {
@@ -152,6 +164,32 @@ int main(int argc, char **argv)
 		}
 
 		close(fd);
+
+
+		//set memory.max_at_node:1
+		
+		(void)snprintf(cgroup_max_size, sizeof(cgroup_max_size), "%s/memory.max_at_node:%d", cgroup, fastmem_node);
+
+		fd = open(cgroup_max_size, O_RDWR);
+
+		if(fd < 0) {
+			fprintf(stdout, "failed to open %s\n", cgroup_max_size);
+			exit(-1);
+		}
+
+		memset(str, 0, sizeof(str));
+
+		(void) snprintf(str, sizeof(str), "%lu\n", fastmem_size  << 20);
+
+		if ((ret = write(fd, str, sizeof(str))) <= 0) {
+			
+			fprintf(stderr, "failed to write pid %d to %s\n", getpid(), cgroup_max_size);
+
+			exit(-1);
+		}
+
+		close(fd);
+
 
 		if (numa_run_on_node_mask_all(cpu_mask) < 0) {
 			fprintf(stderr, "failed to bind on numa node #%d\n", cpu_node);
