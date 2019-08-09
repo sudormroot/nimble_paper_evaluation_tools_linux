@@ -2,6 +2,7 @@
 
 if [ "$1" = "" ];then
 	echo "$0 <result-dir>"
+	exit
 fi
 
 result_dir="$1"
