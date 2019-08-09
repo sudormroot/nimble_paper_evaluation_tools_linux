@@ -4,17 +4,19 @@
 result_dirs_list="`echo result_dir-*`"
 
 
-min="0"
-max="0"
-avg="0"
-sum="0"
-n="0"
+echo ""
 
 extract_data_one_dir(){
 	result_dir="$1"
 
 	training_speed_list="`cat $result_dir/applog.txt |grep examples|awk '{print $8}'|sed 's/(//g'`"
 	fastmem_size="`cat $result_dir/config.txt |grep FAST_MEM_SIZE|cut -d= -f2`"
+
+	min="0"
+	max="0"
+	avg="0"
+	sum="0"
+	n="0"
 
 	for x in $training_speed_list;do
 
@@ -39,6 +41,7 @@ extract_data_one_dir(){
 }
 
 for dir in $result_dirs_list;do
+	echo ""
 	echo "dir=$dir"
 	extract_data_one_dir $dir
 done
