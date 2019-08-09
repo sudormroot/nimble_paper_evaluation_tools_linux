@@ -232,7 +232,7 @@ handle_signal_ALRM() {
 
 	check_child_status="`ps --ppid $$|grep $appname|awk '{print $1}'`"
 
-	$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
+	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
 
 	#check_child_status="`echo $check_child_status`"
 
