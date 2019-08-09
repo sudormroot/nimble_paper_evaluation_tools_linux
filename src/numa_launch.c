@@ -106,6 +106,11 @@ int main(int argc, char **argv)
 
 	while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 		switch (c) {
+			case 0:
+				//if (optarg)
+					printf (" with arg %s", optarg);
+					printf ("\n");
+				break;
 			case 's':
 				fastmem_size = atol(optarg);
 				break;
