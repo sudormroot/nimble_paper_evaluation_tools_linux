@@ -246,7 +246,7 @@ handle_signal_ALRM() {
 	
 	child_pids="`jobs -p`"
 
-	appname="`echo $APP_CMD|cut -d' ' -f4`"
+	appname="`echo $APP_CMD|cut -d' ' -f5`"
 
 	check_child_status="`ps --ppid $$|grep $appname|awk '{print $1}'`"
 
