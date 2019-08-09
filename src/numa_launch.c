@@ -239,6 +239,7 @@ int main(int argc, char **argv)
 		len = 0;
 		for(i = 0; i < argc; i++) {
 			len += snprintf(cmdline + len, "%s ", argv[i]);
+			len++;
 		}
 
 		printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
