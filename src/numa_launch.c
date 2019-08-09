@@ -37,6 +37,7 @@ static char cgroup_procs[256];
 static char cgroup_max_size[256];
 
 static struct sigaction child_exit_sigact = {0};
+static struct sigaction term_sigact = {0};
 
 
 static int child_quit = 0;
@@ -64,6 +65,21 @@ static void usage(const char *appname)
 	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> -- <cmd> <arg1> ...\n", appname);
 }
+
+void term_signal(int sig, siginfo_t *siginfo, void *context)
+{
+	int status;
+
+	slee(1);
+	kill(child_pid, SIGTERM);
+	slee(1);
+	kill(child_pid, SIGKILL);
+
+	waitpid(child_pid, &status, WNOHANG);
+
+	child_quit = 1;
+}
+
 
 void child_exit(int sig, siginfo_t *siginfo, void *context)
 {
@@ -158,11 +174,18 @@ int main(int argc, char **argv)
 
 
 	child_exit_sigact.sa_sigaction = child_exit;
-
 	child_exit_sigact.sa_flags = SA_SIGINFO;
 
 	if (sigaction(SIGCHLD, &child_exit_sigact, NULL) < 0) {
 		perror("failed sigaction SIGCHLD\n");
+		exit(-1);
+	}
+
+	term_sigact.sa_sigaction = term_signal;
+	term_sigact.sa_flags = SA_SIGINFO;
+
+	if (sigaction(SIGTERM, &kill_sigact, NULL) < 0) {
+		perror("failed sigaction SIGTERM\n");
 		exit(-1);
 	}
 

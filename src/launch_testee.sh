@@ -160,6 +160,12 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 test_cleanup() {
 	#child_pids="`jobs -p`"
+	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
+
+	kill $numa_launch_pid 2>/dev/zero
+	sleep 1
+	kill -9 $numa_launch_pid 2>/dev/zero
+
 	child_pids="`ps --ppid $$|grep $appname|awk '{print $1}'`"
 
 	echo "Child pids: $child_pids"
@@ -247,20 +253,24 @@ handle_signal_ALRM() {
 	
 	#child_pids="`jobs -p`"
 
-	numa_launch_pid="`ps --ppid $$|grep numa_launch_pid|awk '{print $1}'`"
+	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
 
 	echo "numa_launch_pid=$numa_launch_pid"
 
 	appname="`echo $APP_CMD|cut -d' ' -f5`"
 
-	check_child_status="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
+	if [ "$numa_launch_pid" = "" ];then
+		check_child_status=""
+	else
+		check_child_status="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
+	fi
 
-	ps --ppid $numa_launch_pid
-	echo ""
-	ps --ppid $numa_launch_pid|grep $appname
-	echo ""
-	ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'
-	echo ""
+	#ps --ppid $numa_launch_pid
+	#echo ""
+	#ps --ppid $numa_launch_pid|grep $appname
+	#echo ""
+	#ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'
+	#echo ""
 
 	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
 
