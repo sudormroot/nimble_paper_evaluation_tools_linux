@@ -169,6 +169,7 @@ test_cleanup() {
 		kill $pid 2>/dev/zero
 		sleep 1
 		kill -9 $pid 2>/dev/zero
+		sleep 1
 
 		echo "Wait child pid $pid to exit ..."
 		#wait $pid
