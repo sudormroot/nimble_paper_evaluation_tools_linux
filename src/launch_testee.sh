@@ -166,7 +166,7 @@ collect_stats(){
 	echo "" >> $STATS_FILE
 
 	echo "CMD=numastat -p $$" >> $STATS_FILE
-	numastat -p $$ >>  -a $STATS_FILE
+	numastat -p $$ >>  $STATS_FILE
 	echo "" >> $STATS_FILE
 
 	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
