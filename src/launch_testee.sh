@@ -160,13 +160,15 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 test_cleanup() {
 	#child_pids="`jobs -p`"
-	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
+#	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
+#
+#	if [ "$numa_launch_pid" != "" ];then
+#		kill $numa_launch_pid 2>/dev/zero
+#		sleep 1
+#		kill -9 $numa_launch_pid 2>/dev/zero
+#	fi
 
-	kill $numa_launch_pid 2>/dev/zero
-	sleep 1
-	kill -9 $numa_launch_pid 2>/dev/zero
-
-	child_pids="`ps --ppid $$|grep $appname|awk '{print $1}'`"
+	child_pids="`ps --ppid $$|awk '{print $1}'|sed '1d'`"
 
 	echo "Child pids: $child_pids"
 
