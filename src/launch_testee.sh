@@ -252,7 +252,7 @@ handle_signal_ALRM() {
 
 	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
 
-	#check_child_status="`echo $check_child_status`"
+	check_child_status="`echo appname=$appname check_child_status=$check_child_status`"
 
 	if [ "$check_child_status" = "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
