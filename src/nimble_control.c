@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 	if (move_hot_and_cold_pages)
 		mm_manage_flags |= MPOL_MF_MOVE_ALL;
 
-	if (no_migration)
+	if (migration == 0)
 		mm_manage_flags &= ~MPOL_MF_MOVE;
 
 
