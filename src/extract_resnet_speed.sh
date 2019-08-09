@@ -1,8 +1,9 @@
 #!/bin/sh
 
+
 if [ "$1" = "" ];then
-	echo "$0 <result-dir>"
-	exit
+        echo "$0 <result-dir>"
+        exit
 fi
 
 result_dir="$1"
@@ -16,21 +17,23 @@ sum="0"
 n="0"
 
 for x in $training_speed_list;do
-	
-	if [ "$min" = "0" ] || [ "$min" < "$x" ];then
-		min="$x"
-	fi
 
-	if [ "$max" = "0" ] || [ "$max" < "$x" ];then
-		max="$x"
-	fi
+        echo "speed=$x"
 
-	sum="`echo '$sum + $x' | bc`"
+        if [ "$min" = "0" ] || [ "$min" \< "$x" ];then
+                min="$x"
+        fi
 
-	n="`expr $n + 1`"
+        if [ "$max" = "0" ] || [ "$max" \< "$x" ];then
+                max="$x"
+        fi
+
+        sum="`echo $sum + $x | bc`"
+
+        n="`expr $n + 1`"
 done
 
-avg="`echo '$sum / $n' | bc`"
+avg="`echo $sum / $n | bc`"
 
 echo "min=$min max=$max avg=$avg"
 
