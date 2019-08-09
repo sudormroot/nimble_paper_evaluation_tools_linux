@@ -146,12 +146,14 @@ test_cleanup() {
 
 	for pid in $child_pids;do
 		echo "Kill child pid $pid ..."
-		kill $pid
+
+		kill $pid 2>/dev/zero
+		sleep 1
+		kill -9 $pid 2>/dev/zero
 
 		echo "Wait child pid $pid to exit ..."
 		wait $pid
 		echo "Child pid $pid exited."
-		sleep 1
 	done
 
 
