@@ -247,15 +247,19 @@ handle_signal_ALRM() {
 	
 	#child_pids="`jobs -p`"
 
+	numa_launch_pid="`ps --ppid $$|grep numa_launch_pid|awk '{print $1}'`"
+
+	echo "numa_launch_pid=$numa_launch_pid"
+
 	appname="`echo $APP_CMD|cut -d' ' -f5`"
 
-	check_child_status="`ps --ppid $$|grep $appname|awk '{print $1}'`"
+	check_child_status="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
 
-	ps --ppid $$
+	ps --ppid $numa_launch_pid
 	echo ""
-	ps --ppid $$|grep $appname
+	ps --ppid $numa_launch_pid|grep $appname
 	echo ""
-	ps --ppid $$|grep $appname|awk '{print $1}'
+	ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'
 	echo ""
 
 	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
