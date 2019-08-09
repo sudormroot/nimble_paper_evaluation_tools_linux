@@ -31,7 +31,7 @@ START_UNIXTIME="0"
 CURRENT_UNIXTIME="0"
 
 show_usage() {
-	echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> --max-mem-size=<Size-in-MB> --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
 if [ $# = 0 ];then
@@ -56,9 +56,6 @@ while [ 1 = 1 ] ; do
 		-i|--enable-traffic-injection) 
 			ENABLE_TRAFFIC_INJECTION=1
 			shift 1;;
-		-M|--max-mem-size=*) 
-			MAX_MEM_SIZE=`echo ${1#*=}`
-			shift 1;;
 		-m|--fast-mem-size=*) 
 			FAST_MEM_SIZE=`echo ${1#*=}`
 			shift 1;;
@@ -76,13 +73,6 @@ done
 
 if [ "$THP_MIGRATION" != "0" ] && [ "$THP_MIGRATION" != "1" ]; then
 	echo "Required --thp_migration=<1|0>"
-	show_usage
-	exit
-fi
-
-
-if [ "$MAX_MEM_SIZE" = "0" ]; then
-	echo "Required --max-mem-size=<Size-in-MB>"
 	show_usage
 	exit
 fi
@@ -125,7 +115,6 @@ log_time $LOG_FILE
 
 echo "THP_MIGRATION=$THP_MIGRATION" | tee -a $LOG_FILE
 echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" | tee -a $LOG_FILE
-echo "MAX_MEM_SIZE=$MAX_MEM_SIZE MB" | tee -a $LOG_FILE
 echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" | tee -a $LOG_FILE
 echo "KILL_TIMEOUT=$KILL_TIMEOUT" | tee -a $LOG_FILE
@@ -143,7 +132,7 @@ echo "APP_CMD=$APP_CMD" >> $CONFIG_FILE
 
 echo "DROP_CACHES_INTERVAL=$DROP_CACHES_INTERVAL" >> $CONFIG_FILE
 echo "STATS_COLLECT_INTERVAL=$STATS_COLLECT_INTERVAL" >> $CONFIG_FILE
-echo "MAX_MEM_SIZE=$MAX_MEM_SIZE" >> $CONFIG_FILE
+#echo "MAX_MEM_SIZE=$MAX_MEM_SIZE" >> $CONFIG_FILE
 echo "FAST_MEM_SIZE=$FAST_MEM_SIZE" >> $CONFIG_FILE
 echo "MIGRATION_THREADS_NUM=$MIGRATION_THREADS_NUM" >> $CONFIG_FILE
 echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" >> $CONFIG_FILE
@@ -233,8 +222,8 @@ sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 # enable memory control
 sudo echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control
 
-sudo echo "$MAX_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max
-echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
+#sudo echo "$MAX_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max
+#echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
 
 sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
@@ -251,7 +240,7 @@ echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee -a $LOG_FILE
 #echo "Set /proc/sys/vm/drop_caches to $DROP_CACHES_INTERVAL"
 
 pid=$$
-echo "$pid" > /sys/fs/cgroup/$CGROUP/cgroup.procs
+sudo echo "$pid" > /sys/fs/cgroup/$CGROUP/cgroup.procs
 echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
 
 
@@ -286,6 +275,8 @@ log_time $LOG_FILE
 # stdbuf is used to set the output buffer and let program immediately output information.
 #
 stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE &
+
+
 
 START_UNIXTIME="`date '+%s'`"
 
