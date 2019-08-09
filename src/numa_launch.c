@@ -26,9 +26,9 @@ struct bitmask *fastmem_mask = NULL;
 struct bitmask *slowmem_mask = NULL;
 struct bitmask *cpu_mask = NULL;
 
-static int fastmem_node = 0;
-static int slowmem_node = 0;
-static int cpu_node = 0;
+static int fastmem_node = -1;
+static int slowmem_node = -1;
+static int cpu_node = -1;
 
 static unsigned long fastmem_size = 0;
 
@@ -61,7 +61,7 @@ static struct option long_options [] =
 
 static void usage(const char *appname)
 {
-	printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> --fast-mem-size=<fast-mem-size-in-mb> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
+	printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 }
 
 void child_exit(int sig, siginfo_t *siginfo, void *context)
@@ -92,12 +92,17 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
-	//char *cmdline;
+	char *cmdline;
+	int i;
+	int len = 0;
+
 
 	if(argc < 6) {
 		usage(argv[0]);
 		exit(0);
 	}
+
+	memset(cgroup, 0, sizeof(cgroup));
 
 	while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 		switch (c) {
@@ -117,7 +122,6 @@ int main(int argc, char **argv)
 				cpu_node = atoi(optarg);
 				break;
 			case 'c':
-				memset(cgroup, 0, sizeof(cgroup));
 				(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
 				break;
 			default:
@@ -125,8 +129,16 @@ int main(int argc, char **argv)
 		}
 	}
 
+
+	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
+		usage();
+		exit(0);
+	}
+
 	//skip
 	argv += optind;
+	argc -= optind;
+
 
 	child_exit_sigact.sa_sigaction = child_exit;
 
@@ -179,7 +191,11 @@ int main(int argc, char **argv)
 
 		memset(str, 0, sizeof(str));
 
-		(void) snprintf(str, sizeof(str), "%lu\n", fastmem_size  << 20);
+		if(fastmem_size == 0) {
+			sprintf(str, "max\n");
+		} else {
+			(void) snprintf(str, sizeof(str), "%lu\n", fastmem_size  << 20);
+		}
 
 		if ((ret = write(fd, str, sizeof(str))) <= 0) {
 			
@@ -202,7 +218,32 @@ int main(int argc, char **argv)
 			exit(-1);
 		}
 
-		printf("Launch %s ...\n",argv[0]);
+		len = 0;
+
+		for(i = 0; i < argc; i++) {
+			len += strlen(argv[i]);
+			len++;
+		}
+
+		len++;
+
+		cmdline = malloc(len);
+
+		if(cmdline == NULL) {
+			perror("failed malloc()\n");
+			exit(-1);
+		}
+
+		memset(cmdline, 0, len);
+
+		len = 0;
+		for(i = 0; i < argc; i++) {
+			len += snprintf(cmdline + len, "%s ", argv[i]);
+		}
+
+		printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
+
+		free(cmdline);
 
 		child_status = execvp(argv[0], argv);
 
