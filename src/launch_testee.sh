@@ -140,21 +140,20 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 test_cleanup() {
-	#appname="`echo $APP_CMD|cut -d' ' -f4`"
-	#appname="`basename $appname`"
+	child_pids="`jobs -p`"
 
-	#echo "Kill $appname ..."
+	echo "Child pids: $child_pids"
 
-	#sudo killall $appname 2>/dev/zero
-	#sleep 2
-	#sudo killall -9 $appname 2>/dev/zero
-	
-	if [ "$!" != "" ]; then
-		echo "Kill child pid $! ..."
-		kill $!
-		sleep 2
-		kill -9 $!
-	fi
+	for pid in $child_pids;do
+		echo "Kill child pid $pid ..."
+		kill $pid
+
+		echo "Wait child pid $pid to exit ..."
+		wait $pid
+		echo "Child pid $pid exited."
+		sleep 1
+	done
+
 
 	echo "Kill numa_memory_traffic_injector ..."
 	#kill -9 $! 2>/dev/zero
@@ -211,8 +210,10 @@ handle_signal_ALRM() {
 
 	CURRENT_UNIXTIME="`date '+%s'`"
 	diff="`expr $CURRENT_UNIXTIME - $START_UNIXTIME`"
+	
+	child_pids="`jobs -p`"
 
-	if [ "$!" != "" ]; then
+	if [ "$child_pids" != "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
 		echo "START_UNIXTIME=$START_UNIXTIME" | tee -a $LOG_FILE
 		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
@@ -313,9 +314,9 @@ log_time $LOG_FILE
 #
 stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE &
 
-echo "Started child pid: $!" | tee -a $LOG_FILE
-#echo "$pid" | sudo tee /sys/fs/cgroup/$CGROUP/cgroup.procs
-#echo "Change /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
+child_pids="`jobs -p`"
+
+echo "Started child pids: $child_pids" | tee -a $LOG_FILE
 
 START_UNIXTIME="`date '+%s'`"
 
