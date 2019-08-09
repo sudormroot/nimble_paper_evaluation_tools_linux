@@ -159,7 +159,8 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 test_cleanup() {
-	child_pids="`jobs -p`"
+	#child_pids="`jobs -p`"
+	child_pids="`ps --ppid $$|grep $appname|awk '{print $1}'`"
 
 	echo "Child pids: $child_pids"
 
