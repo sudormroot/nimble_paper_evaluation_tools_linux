@@ -171,7 +171,14 @@ test_cleanup() {
 		kill -9 $pid 2>/dev/zero
 
 		echo "Wait child pid $pid to exit ..."
-		wait $pid
+		#wait $pid
+		while [ 1 = 1 ];do
+			status="`ps --pid $pid|sed '1d'`"
+			if [ "$status" = "" ];then
+				break;
+			fi
+			sleep 1
+		done
 		echo "Child pid $pid exited."
 	done
 
