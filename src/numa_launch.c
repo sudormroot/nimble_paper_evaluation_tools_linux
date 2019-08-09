@@ -20,7 +20,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-
+#define MPOL_F_MEMCG    (1<<13)
 
 struct bitmask *fastmem_mask = NULL;
 struct bitmask *slowmem_mask = NULL;
@@ -30,7 +30,6 @@ static int fastmem_node = 0;
 static int slowmem_node = 0;
 static int cpu_node = 0;
 
-static int cpu_node = 0;
 
 static char cgroup_procs[256];
 
@@ -143,7 +142,6 @@ int main(int argc, char **argv)
 		(void) snprintf(str, sizeof(str), "%d\n", getpid());
 
 		if ((ret = write(fd, str, sizeof(str))) <= 0) {
-			fprintf(stderr, "write to  memcg: %s error: %d\n", memcg_proc, err);
 			
 			fprintf(stderr, "failed to write pid %d to %s\n", getpid(), cgroup_procs);
 
