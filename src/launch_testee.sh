@@ -140,8 +140,9 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 test_cleanup() {
-	kill -9 $?
+	kill -9 $!
 	killall numa_memory_traffic_injector 2>/dev/zero
+	sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 	exit
 }
 
@@ -283,9 +284,8 @@ log_time $LOG_FILE
 stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE &
 
 echo "Started child pid: $!" | tee -a $LOG_FILE
-echo "$pid" | sudo tee /sys/fs/cgroup/$CGROUP/cgroup.procs
-echo "Change /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
-
+#echo "$pid" | sudo tee /sys/fs/cgroup/$CGROUP/cgroup.procs
+#echo "Change /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
 
 START_UNIXTIME="`date '+%s'`"
 
