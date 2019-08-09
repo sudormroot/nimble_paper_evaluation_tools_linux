@@ -216,11 +216,15 @@ echo "Set parameters ..." | tee -a $LOG_FILE
 ulimit -n $MAX_OPEN_FILES
 echo "Set maximum open files to $MAX_OPEN_FILES"
 
+
+# remove old, if exists
+sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
+
 # create customized control-group named two-level-memory
 sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 
 # enable memory control
-sudo echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control
+echo "+memory" | sudo tee /sys/fs/cgroup/cgroup.subtree_control
 
 #sudo echo "$MAX_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max
 #echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
@@ -229,7 +233,9 @@ sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
 
 
-sudo echo "$FAST_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE
+FAST_MEM_SIZE_BYTES="`expr $FAST_MEM_SIZE * 1024`"
+
+echo "$FAST_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE
 echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE to $FAST_MEM_SIZE MB" | tee -a $LOG_FILE
 
 sudo sysctl vm/limit_mt_num=$MIGRATION_THREADS_NUM
@@ -240,7 +246,7 @@ echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM" | tee -a $LOG_FILE
 #echo "Set /proc/sys/vm/drop_caches to $DROP_CACHES_INTERVAL"
 
 pid=$$
-sudo echo "$pid" > /sys/fs/cgroup/$CGROUP/cgroup.procs
+echo "$pid" | sudo tee /sys/fs/cgroup/$CGROUP/cgroup.procs
 echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" | tee -a $LOG_FILE
 
 
