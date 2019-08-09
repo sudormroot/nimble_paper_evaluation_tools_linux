@@ -56,6 +56,9 @@ while [ 1 = 1 ] ; do
 		-i|--enable-traffic-injection) 
 			ENABLE_TRAFFIC_INJECTION=1
 			shift 1;;
+		-m|--max-mem-size=*) 
+			MAX_MEM_SIZE=`echo ${1#*=}`
+			shift 1;;
 		-m|--fast-mem-size=*) 
 			FAST_MEM_SIZE=`echo ${1#*=}`
 			shift 1;;
@@ -132,7 +135,7 @@ echo "APP_CMD=$APP_CMD" >> $CONFIG_FILE
 
 echo "DROP_CACHES_INTERVAL=$DROP_CACHES_INTERVAL" >> $CONFIG_FILE
 echo "STATS_COLLECT_INTERVAL=$STATS_COLLECT_INTERVAL" >> $CONFIG_FILE
-#echo "MAX_MEM_SIZE=$MAX_MEM_SIZE" >> $CONFIG_FILE
+echo "MAX_MEM_SIZE=$MAX_MEM_SIZE" >> $CONFIG_FILE
 echo "FAST_MEM_SIZE=$FAST_MEM_SIZE" >> $CONFIG_FILE
 echo "MIGRATION_THREADS_NUM=$MIGRATION_THREADS_NUM" >> $CONFIG_FILE
 echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" >> $CONFIG_FILE
@@ -266,8 +269,12 @@ sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
 # enable memory control
 echo "+memory" | sudo tee /sys/fs/cgroup/cgroup.subtree_control
 
-#sudo echo "$MAX_MEM_SIZE""M" > /sys/fs/cgroup/$CGROUP/memory.max
-#echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
+if [ "$MAX_MEM_SIZE" != "0" ];then
+	MAX_MEM_SIZE_BYTES="`expr $MAX_MEM_SIZE \\* 1024 \\* 1024`"
+
+	echo "$MAX_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max
+	echo "memory.max is set to $MAX_MEM_SIZE MB" | tee -a $LOG_FILE
+fi
 
 sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
