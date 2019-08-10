@@ -1,10 +1,13 @@
 #!/bin/sh
 
 
-result_dirs_list="`echo result_dir-*`"
+#result_dirs_list="`echo result_dir-*`"
 
+#sort by memsize
+result_dirs_list="`echo result_dir-* | sed 's/\( \)\+/\n/g'|sort -t_ -n -k5`"
 
-echo ""
+result_dirs_list="`echo $result_dirs_list`"
+
 
 extract_data_one_dir(){
 	result_dir="$1"
