@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
 	setbuf(stdout, NULL);
 
-	if(argc < 5) {
+	if(argc < 4) {
 		usage(argv[0]);
 		exit(0);
 	}
@@ -188,6 +188,11 @@ int main(int argc, char **argv)
 	}
 
 
+
+	if(fastmem_node == -1 || slowmem_node == -1 || pid == 0) {
+		usage(argv[0]);
+		exit(-1);
+	}
      
 
 	if (	concur_migration + opt_migration + basic_exchange_pages + concur_only_exchange_pages + exchange_pages > 1) {
