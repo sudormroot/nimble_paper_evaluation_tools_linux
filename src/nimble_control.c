@@ -203,11 +203,11 @@ int main(int argc, char **argv)
 
 	if (migration == 0) {
 		mm_manage_flags &= ~MPOL_MF_MOVE;
-		printf("Clear MPOL_MF_MOVE\n");
+		//printf("Clear MPOL_MF_MOVE\n");
 	} else {
 		mm_manage_flags |= MPOL_MF_MOVE;
 
-		printf("Add MPOL_MF_MOVE\n");
+		//printf("Add MPOL_MF_MOVE\n");
 
 		if(exchange_pages + concur_only_exchange_pages + basic_exchange_pages + opt_migration + concur_migration == 0) {
 			exchange_pages = 1;
@@ -215,38 +215,38 @@ int main(int argc, char **argv)
 
 		if (concur_migration) {
 			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR;
-			printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR\n");
+			//printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR\n");
 		}
 
 		if (opt_migration) {
 			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR;
-			printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR\n");
+			//printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR\n");
 		}
 
 		if (basic_exchange_pages) {
 			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_EXCHANGE;
-			printf("Add MPOL_MF_MOVE|MPOL_MF_EXCHANGE\n");
+			//printf("Add MPOL_MF_MOVE|MPOL_MF_EXCHANGE\n");
 		}
 
 		if (concur_only_exchange_pages) {
 			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE;
-			printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE\n");
+			//printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE\n");
 		}
 
 		if (exchange_pages) {
 			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE;
-			printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE\n");
+			//printf("Add MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE\n");
 		}
 	}
 
 	if(move_hot_and_cold_pages) {
 		mm_manage_flags |= MPOL_MF_MOVE_ALL;
-		printf("Add MPOL_MF_MOVE_ALL\n");
+		//printf("Add MPOL_MF_MOVE_ALL\n");
 	}
 
 	if (shrink_page_lists) {
 		mm_manage_flags |= MPOL_MF_SHRINK_LISTS;
-		printf("Add MPOL_MF_SHRINK_LISTS\n");
+		//printf("Add MPOL_MF_SHRINK_LISTS\n");
 	}
 
 	if (mm_manage_flags & ~(
