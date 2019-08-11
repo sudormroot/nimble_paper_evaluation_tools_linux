@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 	} else {
 		mm_manage_flags |= MPOL_MF_MOVE;
 
-		printf("Set MPOL_MF_MOVE\n");
+		printf("Add MPOL_MF_MOVE\n");
 
 		if(exchange_pages + concur_only_exchange_pages + basic_exchange_pages + opt_migration + concur_migration == 0) {
 			exchange_pages = 1;
