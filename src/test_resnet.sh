@@ -32,14 +32,14 @@ echo "PER_NODE_THREADS=$PER_NODE_THREADS"
 #echo "PER_NODE_MEM_SIZE=$PER_NODE_MEM_SIZE"
 
 #1G 2G 3G
-FASTMEM_SIZE_LIST="`seq 1024 256 4096`"
+FASTMEM_SIZE_LIST="`seq 128 256 8192`"
 
 
 echo "FASTMEM_SIZE_LIST=`echo $FASTMEM_SIZE_LIST`"
 
 program_home="`echo ~`"
 
-program="$program_home/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=2000"
+program="$program_home/resnet-in-tensorflow/cifar10_train.py --num_residual_blocks=5 --report_freq=60 --train_steps=1500"
 
 
 #num_residual_blocks : int. The total layers of the ResNet = 6 * num residual blocks + 2

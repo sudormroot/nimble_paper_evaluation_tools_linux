@@ -344,7 +344,7 @@ void measure_memory_access_time(int cpu_node, int mem_node)
 	numa_free_nodemask(cpu_mask);
 	numa_free_nodemask(mem_mask);
 	
-	numa_free(ptr, size);
+	numa_free((void *)ptr, size);
 }
 
 int main(int argc, char **argv)
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 
 	srand((unsigned) time(&seed));
 
-	(void) nice(-20);
+	nice(-20);
 	
 	setbuf(stdout, NULL);
 
