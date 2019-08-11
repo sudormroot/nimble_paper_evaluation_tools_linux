@@ -1,3 +1,10 @@
+/*
+ * 
+ * Author: Jiaolin Luo
+ * refer: nimble_page_management_asplos_2019/mm/memory_manage.c
+ * */
+
+
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -38,7 +45,7 @@ struct bitmask *slowmem_mask = NULL;
 static unsigned long managed_pages = ULONG_MAX;
 
 static int migration=1;
-static int thp_migration=0;
+//static int thp_migration=1;
 
 static int concur_migration=0;
 static int opt_migration=0;
@@ -63,9 +70,7 @@ static struct option long_options [] =
 
 	{"nomigration", no_argument, 0, 'N'},
 
-	{"non-thp-migration", no_argument, 0, 't'},
-
-	{"thp-migration", no_argument, 0, 'T'},
+	//{"thp-migration", required_argument, 0, 't'},
 
 	{"concur-migration", no_argument, 0, 'C'},
 	{"opt-migration", no_argument, 0, 'o'},
@@ -78,12 +83,28 @@ static struct option long_options [] =
 	{0,0,0,0}
 };
 
-
+//
+//
+// nimble_control 	--pid=xxx --fast-mem-node=1 --slow-mem-node=0 --managed-pages=max
+// 					--thp-migration
+// 					--move-hot-and-cold-pages
+//
+//
+//
 static void usage(const char *appname)
 {
-	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> [--max-pages] \\\n", appname);
-	printf("		--non-thp-migration|--thp-migration \\\n");
-	printf("		[--nomigration|--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages|--move-hot-and-cold-pages|--shrink-page-lists]\n");
+	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> [--max-pages=<max|number-of-pages>] \\\n", appname);
+	//printf("		[--thp-migration=<1|0>] \\\n");
+	printf("		[[--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages]|--nomigration] \\\n");
+	printf("		[--move-hot-and-cold-pages] \\\n");
+	printf("		[--shrink-page-lists]\n");
+
+	printf("Example 1: enable all nimble migration features and move as maximum pages as possible.\n");
+	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
+
+	printf("Example 2: enable all nimble migration features and move pages up to 10000.\n");
+	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> --max-pages=10000\\\n", appname);
+
 }
 
 int main(int argc, char **argv)
@@ -102,7 +123,7 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	while ((c = getopt_long(argc, argv, "F:S:P:NtTCobcems", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "F:S:P:NCobcems", long_options, &option_index)) != -1) {
 		switch (c) {
 			case 'p':
 				pid = atoi(optarg);
@@ -116,17 +137,23 @@ int main(int argc, char **argv)
 				slowmem_node = atoi(optarg);
 				break;
 			case 'P':
-				managed_pages = atol(optarg);
+				if(strcmp(optarg, "max") == 0)
+					managed_pages = ULONG_MAX;
+				else
+					managed_pages = atol(optarg);
 				break;
 			case 'N':
 				migration = 0;
 				break;
+#if 0
 			case 't':
-				thp_migration=0;
+				thp_migration= atoi(optarg);
+
+				if(thp_migration != 0 && thp_migration != 1)
+					thp_migration = 1;
+
 				break;
-			case 'T':
-				thp_migration=1;
-				break;
+#endif
 			case 'C':
 				concur_migration=1;
 				break;
@@ -154,51 +181,71 @@ int main(int argc, char **argv)
 	}
 
 
+     
 
-	if (	thp_migration + concur_migration + opt_migration + 
-			basic_exchange_pages + concur_only_exchange_pages + exchange_pages > 1) {
-		perror("--thp-migration|--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages can be used one of them at one time\n");
+	if (	concur_migration + opt_migration + basic_exchange_pages + concur_only_exchange_pages + exchange_pages > 1) {
+		perror("--concur-migration|--opt-migration|--basic-exchange-pages|--concur-only-exchange-pages|--exchange-pages can be used one of them at one time\n");
 		exit(-1);
 	}
 
-	if (migration)
+
+	if (migration == 0) {
+		mm_manage_flags &= ~MPOL_MF_MOVE;
+	} else {
 		mm_manage_flags |= MPOL_MF_MOVE;
 
-	if (concur_migration)
-		mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR;
+		if(exchange_pages + concur_only_exchange_pages + basic_exchange_pages + opt_migration + concur_migration == 0) {
+			exchange_pages = 1;
+		} 
 
-	if (opt_migration)
-		mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR;
+		if (concur_migration)
+			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR;
 
-	if (basic_exchange_pages)
-		mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_EXCHANGE;
+		if (opt_migration)
+			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR;
 
-	if (concur_only_exchange_pages)
-		mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE;
+		if (basic_exchange_pages)
+			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_EXCHANGE;
 
-	if (exchange_pages)
-		mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE;
+		if (concur_only_exchange_pages)
+			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE;
+
+		if (exchange_pages)
+			mm_manage_flags |= MPOL_MF_MOVE|MPOL_MF_MOVE_MT|MPOL_MF_MOVE_CONCUR|MPOL_MF_EXCHANGE;
+	}
+
+	if(move_hot_and_cold_pages)
+		mm_manage_flags |= MPOL_MF_MOVE_ALL;
 
 	if (shrink_page_lists)
 		mm_manage_flags |= MPOL_MF_SHRINK_LISTS;
 
-	if (move_hot_and_cold_pages)
-		mm_manage_flags |= MPOL_MF_MOVE_ALL;
+	if (mm_manage_flags & ~(
+                   MPOL_MF_MOVE|
+                  MPOL_MF_MOVE_MT|
+                   MPOL_MF_MOVE_DMA|
+                   MPOL_MF_MOVE_CONCUR|
+                   MPOL_MF_EXCHANGE|
+                   MPOL_MF_SHRINK_LISTS|
+                   MPOL_MF_MOVE_ALL)) {
+		usage(argv[0]);
+		exit(0);
+	}
 
-	if (migration == 0)
-		mm_manage_flags &= ~MPOL_MF_MOVE;
 
 
 	max_nodes = numa_num_possible_nodes();
 
-	//printf("Trigger page migration pid = %d %d -> %d...\n", pid, slowmem_node, fastmem_node);
+	printf("Trigger page migration pid = %d slow #%d -> fast #%d managed_pages = %lu ...\n", pid, slowmem_node, fastmem_node, managed_pages);
 
 	ret = syscall(syscall_mm_manage, pid, managed_pages, max_nodes + 1, slowmem_mask->maskp, fastmem_mask->maskp, mm_manage_flags);
 
 	if(ret)
 		fprintf(stderr, "Page migration failed pid = %d, ret = %d\n", pid, ret);
+	else
+		printf("Page migration finished for pid = %d with ret = %d\n", pid, ret);
 
-	return ret;
+	exit(ret);
 }
 
 

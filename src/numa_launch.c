@@ -1,3 +1,9 @@
+/*
+ *
+ * Author: Jiaolin Luo
+ *
+ * */
+
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -32,9 +38,9 @@ static int cpu_node = -1;
 
 //static unsigned long fastmem_size = 0;
 
-static char cgroup[128];
-static char cgroup_procs[256];
-static char cgroup_max_size[256];
+//static char cgroup[128];
+//static char cgroup_procs[256];
+//static char cgroup_max_size[256];
 
 static struct sigaction child_exit_sigact = {0};
 static struct sigaction term_sigact = {0};

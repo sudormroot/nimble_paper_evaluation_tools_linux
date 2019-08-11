@@ -161,15 +161,7 @@ echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
 
 
 test_cleanup() {
-	#child_pids="`jobs -p`"
-#	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
-#
-#	if [ "$numa_launch_pid" != "" ];then
-#		kill $numa_launch_pid 2>/dev/zero
-#		sleep 1
-#		kill -9 $numa_launch_pid 2>/dev/zero
-#	fi
-
+	
 	child_pids="`ps --ppid $$|awk '{print $1}'|sed '1d'`"
 
 	echo "Child pids: $child_pids"
@@ -214,37 +206,50 @@ handle_signal_INT() {
 }
 
 collect_stats(){
-	echo "CMD=sysctl vm" >> $STATS_FILE
-	sudo sysctl vm >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=sysctl vm" >> $STATS_FILE
+	#sudo sysctl vm >> $STATS_FILE
+	#echo "" >> $STATS_FILE
 
-	echo "CMD=numastat" >> $STATS_FILE
-	numastat >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=numastat" >> $STATS_FILE
+	#numastat >> $STATS_FILE
+	#echo "" >> $STATS_FILE
 	
-	echo "CMD=numastat -m" >> $STATS_FILE
-	numastat -m >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=numastat -m" >> $STATS_FILE
+	#numastat -m >> $STATS_FILE
+	#echo "" >> $STATS_FILE
 
-	echo "CMD=numastat -p $$" >> $STATS_FILE
-	numastat -p $$ >>  $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=numastat -p $$" >> $STATS_FILE
+	#numastat -p $$ >>  $STATS_FILE
+	#echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/meminfo" >> $STATS_FILE
-	cat /proc/meminfo >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=cat /proc/meminfo" >> $STATS_FILE
+	#cat /proc/meminfo >> $STATS_FILE
+	#echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/zoneinfo" >> $STATS_FILE
-	cat /proc/zoneinfo >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=cat /proc/zoneinfo" >> $STATS_FILE
+	#cat /proc/zoneinfo >> $STATS_FILE
+	#echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/vmstat" >> $STATS_FILE
-	cat /proc/vmstat >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=cat /proc/vmstat" >> $STATS_FILE
+	#cat /proc/vmstat >> $STATS_FILE
+	#echo "" >> $STATS_FILE
 
-	echo "CMD=cat /proc/$$/page_migration_stats" >> $STATS_FILE
-	cat /proc/$$/page_migration_stats >> $STATS_FILE
-	echo "" >> $STATS_FILE
+	#echo "CMD=cat /proc/$$/page_migration_stats" >> $STATS_FILE
+	#cat /proc/$$/page_migration_stats >> $STATS_FILE
+	#echo "" >> $STATS_FILE
+
+	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
+	appname="`echo $APP_CMD|cut -d' ' -f5`"
+
+	if [ "$numa_launch_pid" != "" ];then
+		app_pid="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
+
+		if [ "$app_pid" != "" ]; then
+			cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g' >> $STATS_FILE
+			cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g'
+		fi
+	fi
+
 }
 
 
@@ -264,23 +269,19 @@ handle_signal_ALRM() {
 	appname="`echo $APP_CMD|cut -d' ' -f5`"
 
 	if [ "$numa_launch_pid" = "" ];then
-		check_child_status=""
+		app_pid=""
 	else
-		check_child_status="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
+		app_pid="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
 	fi
 
-	#ps --ppid $numa_launch_pid
-	#echo ""
-	#ps --ppid $numa_launch_pid|grep $appname
-	#echo ""
-	#ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'
-	#echo ""
+	#Trigger Nimble kernel part to do migration
+	$PROG_HOME/nimble_control 	--pid $app_pid \
+								--fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE \
+								----move-hot-and-cold-pages --exchange-pages
 
-	#$PROG_HOME/nimble_control --pid $check_child_status --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --thp-migration 
+	#echo "appname=$appname app_pid=$app_pid"
 
-	#echo "appname=$appname check_child_status=$check_child_status"
-
-	if [ "$check_child_status" = "" ]; then
+	if [ "$app_pid" = "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE
 		echo "START_UNIXTIME=$START_UNIXTIME" | tee -a $LOG_FILE
 		echo "CURRENT_UNIXTIME=$CURRENT_UNIXTIME" | tee -a $LOG_FILE
