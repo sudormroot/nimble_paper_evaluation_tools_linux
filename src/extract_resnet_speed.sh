@@ -10,7 +10,7 @@ result_dirs_list="`echo $result_dirs_list`"
 
 result_csv="result.csv"
 
-echo "FASTMEM_SIZE_IN_MB        THP_MIGRATION   TRAINING_SPEED_AVG      TRAINING_SPEED_MAX      TRAINING_SPEED_MIN" > $result_csv
+echo "FASTMEM_SIZE_IN_MB \t THP_MIGRATION \t TRAINING_SPEED_AVG \t TRAINING_SPEED_MAX \t TRAINING_SPEED_MIN" > $result_csv
 
 extract_data_one_dir(){
 	result_dir="$1"
@@ -45,7 +45,7 @@ extract_data_one_dir(){
 	avg="`echo $sum / $n | bc`"
 
 	echo "thp_migration=$thp_migration, fastmem_size=$fastmem_size MB, training speed min=$min max=$max avg=$avg"
-	echo "$fastmem_size \t\t\t $thp_migration \t\t $avg \t\t\t $max \t\t\t $min" >>  $result_csv
+	echo "$fastmem_size \t $thp_migration \t $avg \t $max \t $min" >>  $result_csv
 }
 
 for dir in $result_dirs_list;do
@@ -54,7 +54,8 @@ for dir in $result_dirs_list;do
 	extract_data_one_dir $dir
 done
 
-echo "The result is written in \"$result_csv\":"
+echo ""
+echo "The result is written into \"$result_csv\":"
 cat $result_csv
 echo ""
 
