@@ -176,7 +176,8 @@ int main(int argc, char **argv)
 				shrink_page_lists=1;
 				break;
 			default:
-				abort();
+				break;
+				//abort();
 		}
 	}
 
