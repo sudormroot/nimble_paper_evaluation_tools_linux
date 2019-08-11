@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 
 	srand((unsigned) time(&seed));
 
-	nice(-20);
+	(void) nice(-20);
 	
 	setbuf(stdout, NULL);
 

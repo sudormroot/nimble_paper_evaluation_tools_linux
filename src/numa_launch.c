@@ -307,7 +307,7 @@ int main(int argc, char **argv)
 	while(child_quit == 0)
 		sleep(1);
 
-	printf("Child %d exited\n", argv[0], child_pid);
+	printf("Child %s pid %d exited\n", argv[0], child_pid);
 
 	exit(0);
 }
