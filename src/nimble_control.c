@@ -83,14 +83,6 @@ static struct option long_options [] =
 	{0,0,0,0}
 };
 
-//
-//
-// nimble_control 	--pid=xxx --fast-mem-node=1 --slow-mem-node=0 --managed-pages=max
-// 					--thp-migration
-// 					--move-hot-and-cold-pages
-//
-//
-//
 static void usage(const char *appname)
 {
 	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> [--max-pages=<max|number-of-pages>] \\\n", appname);
@@ -103,7 +95,7 @@ static void usage(const char *appname)
 	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 
 	printf("Example 2: enable all nimble migration features and move pages up to 10000.\n");
-	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> --max-pages=10000\\\n", appname);
+	printf("%s 		--pid=<PID> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> --max-pages=10000\n", appname);
 
 }
 
