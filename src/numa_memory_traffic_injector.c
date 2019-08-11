@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 
 	printf("Inject traffic on memory node %d, executing on cpu node %d, ...\n", mem_node, cpu_node);
 
-	nice(-20);
+	(void) nice(-20);
 
 	/*
 	 * Bind process to cpu node
