@@ -339,6 +339,10 @@ sudo sysctl vm.sysctl_enable_thp_migration=$THP_MIGRATION
 echo "Set vm.sysctl_enable_thp_migration=$THP_MIGRATION" | tee -a $LOG_FILE
 
 
+#Disable linux auto-NUMA migration
+echo "Disable Linux auto-NUMA migration" | tee -a $LOG_FILE
+sudo sysctl kernel.numa_balancing=0
+
 sudo sysctl vm/migration_batch_size=$MIGRATION_BATCH_SIZE
 echo "Set vm/migration_batch_size=$MIGRATION_BATCH_SIZE"
 
