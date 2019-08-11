@@ -246,7 +246,7 @@ collect_stats(){
 
 		if [ "$app_pid" != "" ]; then
 			cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g' >> $STATS_FILE
-			cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g'
+			#cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g'
 		fi
 	fi
 
