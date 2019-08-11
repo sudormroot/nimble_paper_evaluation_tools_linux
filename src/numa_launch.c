@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	memset(cgroup, 0, sizeof(cgroup));
+	//memset(cgroup, 0, sizeof(cgroup));
 
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 	while ((c = getopt_long(argc, argv, "F:C:", long_options, &option_index)) != -1) {
