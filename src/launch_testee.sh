@@ -245,7 +245,8 @@ collect_stats(){
 		app_pid="`ps --ppid $numa_launch_pid|grep $app_name|awk '{print $1}'`"
 
 		if [ "$app_pid" != "" ]; then
-			cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g' >> $STATS_FILE
+			page_migration_stats="`cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g'`" 
+			echo $page_migration_stats >> $STATS_FILE
 			#cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g'
 		fi
 	fi
