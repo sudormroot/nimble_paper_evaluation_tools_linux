@@ -198,7 +198,7 @@ test_cleanup() {
 	#sudo killall numa_memory_traffic_injector 2>/dev/zero
 
 	echo "Remove /sys/fs/cgroup/$CGROUP ..."
-	sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
+	sudo rmdir /sys/fs/cgroup/"$CGROUP""*" 2>/dev/zero
 
 	echo "Cleanup finished."
 
@@ -339,7 +339,7 @@ echo "Set maximum open files to $MAX_OPEN_FILES"
 
 
 # remove old, if exists
-sudo rmdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
+sudo rmdir /sys/fs/cgroup/"$CGROUP""*" 2>/dev/zero
 
 # create customized control-group 
 sudo mkdir /sys/fs/cgroup/$CGROUP 2>/dev/zero
