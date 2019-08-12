@@ -9,7 +9,7 @@ https://github.com/ysarch-lab/nimble_page_management_asplos_2019
 
 2. Build tools:
 
-$ git clone https://github.com/sudormroot/memory_test_tools_linux.git
+$ git clone --branch stable_v1 https://github.com/sudormroot/memory_test_tools_linux.git 
 $ cd memory_test_tools_linux/src 
 $ make clean && make
 
