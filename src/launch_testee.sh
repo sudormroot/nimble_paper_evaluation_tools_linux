@@ -279,13 +279,13 @@ handle_signal_ALRM() {
 	#NIMBLE_CONTROL_OPTIONS="--exchange-pages --move-hot-and-cold-pages"
 	NIMBLE_CONTROL_OPTIONS="--exchange-pages"
 
-	echo "app_name=$app_name app_pid=$app_pid"
-	echo "Call $PROG_HOME/nimble_control ..."
+	#echo "app_name=$app_name app_pid=$app_pid"
+	#echo "Call $PROG_HOME/nimble_control ..."
 
 	#Trigger Nimble kernel part to do migration
 	$PROG_HOME/nimble_control 	--pid=$app_pid \
 								--fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE \
-								$NIMBLE_CONTROL_OPTIONS >> $LOG_FILE 
+								$NIMBLE_CONTROL_OPTIONS | tee -a $LOG_FILE 
 
 	#echo "app_name=$app_name app_pid=$app_pid"
 
