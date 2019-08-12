@@ -415,7 +415,7 @@ log_time $LOG_FILE
 # Programs such as python has its own output buffer, thus the pipe may not work.
 # stdbuf is used to set the output buffer and let program immediately output information.
 #
-stdbuf -oL $APP_CMD | tee -a $APPLOG_FILE 2>&1 &
+stdbuf -oL $APP_CMD 2>&1 | tee -a $APPLOG_FILE &
 
 child_pids="`jobs -p`"
 
