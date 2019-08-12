@@ -286,7 +286,7 @@ handle_signal_ALRM() {
 	#Trigger Nimble kernel part to do migration
 	$PROG_HOME/nimble_control 	--pid=$app_pid \
 								--fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE \
-								$NIMBLE_CONTROL_OPTIONS | tee -a $LOG_FILE 
+								$NIMBLE_CONTROL_OPTIONS >> $LOG_FILE 
 
 	#echo "app_name=$app_name app_pid=$app_pid"
 
