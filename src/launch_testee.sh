@@ -239,10 +239,10 @@ collect_stats(){
 	#echo "" >> $STATS_FILE
 
 	numa_launch_pid="`ps --ppid $$|grep numa_launch|awk '{print $1}'`"
-	appname="`echo $APP_CMD|cut -d' ' -f5`"
+	app_name="`echo $APP_CMD|cut -d' ' -f5`"
 
 	if [ "$numa_launch_pid" != "" ];then
-		app_pid="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
+		app_pid="`ps --ppid $numa_launch_pid|grep $app_name|awk '{print $1}'`"
 
 		if [ "$app_pid" != "" ]; then
 			cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g' >> $STATS_FILE
@@ -266,20 +266,28 @@ handle_signal_ALRM() {
 
 	#echo "numa_launch_pid=$numa_launch_pid"
 
-	appname="`echo $APP_CMD|cut -d' ' -f5`"
+	app_name="`echo $APP_CMD|cut -d' ' -f5`"
 
 	if [ "$numa_launch_pid" = "" ];then
 		app_pid=""
 	else
-		app_pid="`ps --ppid $numa_launch_pid|grep $appname|awk '{print $1}'`"
+		app_pid="`ps --ppid $numa_launch_pid|grep $app_name|awk '{print $1}'`"
 	fi
+
+
+
+	#NIMBLE_CONTROL_OPTIONS="--exchange-pages --move-hot-and-cold-pages"
+	NIMBLE_CONTROL_OPTIONS="--exchange-pages"
+
+	echo "app_name=$app_name app_pid=$app_pid"
+	echo "Call $PROG_HOME/nimble_control ..."
 
 	#Trigger Nimble kernel part to do migration
 	$PROG_HOME/nimble_control 	--pid=$app_pid \
 								--fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE \
-								--move-hot-and-cold-pages --exchange-pages >> $LOG_FILE 
+								$NIMBLE_CONTROL_OPTIONS >> $LOG_FILE 
 
-	#echo "appname=$appname app_pid=$app_pid"
+	#echo "app_name=$app_name app_pid=$app_pid"
 
 	if [ "$app_pid" = "" ]; then
 		echo "Child process exited, cleanup ..." | tee -a $LOG_FILE

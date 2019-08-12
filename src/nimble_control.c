@@ -182,6 +182,7 @@ int main(int argc, char **argv)
 
 
 	if(fastmem_node == -1 || slowmem_node == -1 || pid == 0) {
+		perror("--pid=<pid>, --fast-mem-node=<fast-mem-node>, --slow-mem-node=<slow-mem-node> are required\n");
 		usage(argv[0]);
 		exit(-1);
 	}
@@ -266,7 +267,7 @@ int main(int argc, char **argv)
 	else
 		printf("Page migration finished for pid = %d with ret = %d\n", pid, ret);
 
-	exit(ret);
+	return ret;
 }
 
 
