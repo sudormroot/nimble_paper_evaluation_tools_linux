@@ -12,7 +12,7 @@ https://github.com/ysarch-lab/nimble_page_management_asplos_2019
 check releases
 $ git tag --list
 
-$ git clone --branch stable_v2 https://github.com/sudormroot/memory_test_tools_linux.git 
+$ git clone https://github.com/sudormroot/memory_test_tools_linux.git 
 
 $ cd memory_test_tools_linux/src 
 
