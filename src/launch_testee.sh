@@ -249,7 +249,7 @@ collect_stats(){
 
 	if [ "$numa_launch_pid" != "" ];then
 		#app_pid="`ps --ppid $numa_launch_pid|grep $app_name|awk '{print $1}'`"
-		app_pid="`ps --ppid $numa_launch_pid|awk '{print $1}'|sed '1d'`"
+		app_pid="`ps --ppid $numa_launch_pid|awk '{print $1}'|sed '1d'|cut -d' ' -f1`"
 
 		if [ "$app_pid" != "" ]; then
 			page_migration_stats="`cat /proc/$app_pid/page_migration_stats | sed 's/\( \)/=/g'`" 
@@ -280,7 +280,7 @@ handle_signal_ALRM() {
 		app_pid=""
 	else
 		#app_pid="`ps --ppid $numa_launch_pid|grep $app_name|awk '{print $1}'`"
-		app_pid="`ps --ppid $numa_launch_pid|awk '{print $1}'|sed '1d'`"
+		app_pid="`ps --ppid $numa_launch_pid|awk '{print $1}'|sed '1d'|cut -d' ' -f1`"
 	fi
 
 
