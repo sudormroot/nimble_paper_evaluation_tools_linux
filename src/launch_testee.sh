@@ -40,6 +40,12 @@ show_usage() {
 	echo "$0 [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
+if [ ! -f "$PROG_HOME/numa_launch" ] || [ ! -f "$PROG_HOME/nimble_control" ];then
+	echo "$0 needs numa_launch and nimble_control, please run make to build these tools before using"
+	exit
+fi
+
+
 if [ $# = 0 ];then
 	show_usage
 	exit
