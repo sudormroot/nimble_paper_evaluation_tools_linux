@@ -34,6 +34,7 @@ CURRENT_UNIXTIME="0"
 
 
 PROG_HOME="`dirname $0`"
+#PROG_HOME=`cd $PROG_HOME; pwd`
 
 show_usage() {
 	#echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
@@ -59,16 +60,16 @@ fi
 
 while [ 1 = 1 ] ; do
 	case "$1" in
-		-M|--kill-timeout=*) 
+		-k|--kill-timeout=*) 
 			KILL_TIMEOUT=`echo ${1#*=}`
 			shift 1;;
-		-M|--thp-migration=*) 
+		-T|--thp-migration=*) 
 			THP_MIGRATION=`echo ${1#*=}`
 			shift 1;;
 		-i|--enable-traffic-injection) 
 			ENABLE_TRAFFIC_INJECTION=1
 			shift 1;;
-		-m|--max-mem-size=*) 
+		-M|--max-mem-size=*) 
 			MAX_MEM_SIZE=`echo ${1#*=}`
 			shift 1;;
 		-m|--fast-mem-size=*) 
@@ -284,7 +285,7 @@ handle_signal_ALRM() {
 		app_pid="`ps --ppid $numa_launch_pid|awk '{print $1}'|sed '1d'|cut -d' ' -f1`"
 	fi
 
-
+	#The nimble kernel has a bug with "--move-hot-and-cold-pages" probably
 	#NIMBLE_CONTROL_OPTIONS="--exchange-pages --move-hot-and-cold-pages"
 	NIMBLE_CONTROL_OPTIONS="--exchange-pages"
 
