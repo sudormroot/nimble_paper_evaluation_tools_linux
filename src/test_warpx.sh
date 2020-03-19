@@ -70,19 +70,17 @@ handle_signal_ALRM() {
 	
     child_pids="`ps -ax|grep warpx|sed '/grep/d'|sed '/mpirun/d'|sed '/numa_launch/d'|sed '/sh/d'|awk '{print $1}'`"
 
-	echo "Warpx pids: $child_pids"
+	#echo "Warpx pids: $child_pids"
 
 	for pid in $child_pids;do
-		echo "pid $pid ..."
+		#echo "pid $pid ..."
 
 
 	    if [ "$pid" != "" ];then
-		    echo "Page migration start ..."
+		    #echo "Page migration start ..."
 		    #Trigger Nimble kernel part to do migration
-		    $PROG_HOME/nimble_control --pid=$pid \
-									  --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE \
-									$NIMBLE_CONTROL_OPTIONS
-		    echo "Page migration start end: ret=$?"
+		    $PROG_HOME/nimble_control --pid=$pid --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE $NIMBLE_CONTROL_OPTIONS
+		    #echo "Page migration start end: ret=$?"
 	    fi
     done
     
