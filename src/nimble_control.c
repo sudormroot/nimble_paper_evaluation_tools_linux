@@ -33,7 +33,20 @@
 
 #define MPOL_F_MEMCG	(1<<13)
 
-static int syscall_mm_manage = 334;
+//
+// https://github.com/ysarch-lab/nimble_page_management_asplos_2019/tree/nimble_page_management_5_6_rc6
+// Rebase to 5.6-rc6. The kernel compiles but is not tested.
+//
+// The two added syscall numbers are changed due to new syscalls added to the new kernel:
+//
+// 333->439 : bd2c4260: exchange page: Add exchange_page() syscall.
+// 334->440 : 7ceb0525: memory manage: Add memory manage syscall.
+// You need to update userspace programs (exchange_page microbenchmark and end-to-end launcher) accordingly.
+//
+
+
+//static int syscall_mm_manage = 334;
+static int syscall_mm_manage = 440;
 static int mm_manage_flags = 0;
 
 static int fastmem_node = -1;
