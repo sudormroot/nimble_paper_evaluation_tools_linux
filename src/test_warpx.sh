@@ -2,11 +2,13 @@
 
 
 
-if [ "$#" -ne 5 ];then
-    echo "$0 <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>"
+if [ "$#" -ne 7 ];then
+    echo "$0 <mpi-ranks> <omp-threads> <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>"
     exit
 fi
 
+MPI_RANKS="$1"
+OMP_THREADS="$2"
 
 SLOW_NODE=2
 FAST_NODE=0
@@ -20,17 +22,16 @@ DROP_CACHES_INTERVAL=3	    #drop caches for every 3 seconds
 MIGRATION_BATCH_SIZE=8
 
 MAX_MEM_SIZE="0"
-FAST_MEM_SIZE="$1"
-MIGRATION_THREADS_NUM="$2"
+FAST_MEM_SIZE="$3"
+MIGRATION_THREADS_NUM="$4"
 THP_MIGRATION="0"
 
-MIGRATION_INTERVAL="$3"
+MIGRATION_INTERVAL="$5"
 
-WARPX_EXE="$4"
-WARPX_PROBLEM="$5"
+WARPX_EXE="$6"
+WARPX_PROBLEM="$7"
 
 PROG_HOME="`dirname $0`"
-APP_CMD="$PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM" 
 
 
 echo "THP_MIGRATION=$THP_MIGRATION" 
@@ -43,7 +44,6 @@ echo "SLOW_NODE=$SLOW_NODE"
 echo "MIGRATION_INTERVAL=$MIGRATION_INTERVAL"
 echo "WARPX_EXE=$WARPX_EXE"
 echo "WARPX_PROBLEM=$WARPX_PROBLEM"
-echo "APP_CMD=$APP_CMD"
 
 
 
@@ -68,7 +68,7 @@ NIMBLE_CONTROL_OPTIONS="--exchange-pages"
 
 handle_signal_ALRM() {
 	
-	child_pids="`ps --ppid $$|sed '/grep/d'|sed '/numa_launch/d'|awk '{print $1}'|sed '1d'`"
+    child_pids="`ps -ax|grep warpx|sed '/grep/d'|sed '/mpirun/d'|sed '/numa_launch/d'|sed '/sh/d'|awk '{print $1}'`"
 
 	echo "Warpx pids: $child_pids"
 
@@ -160,7 +160,12 @@ echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid"
 
 mkdir results_nimble
 
-stdbuf -oL $APP_CMD 2>&1 | tee -a results_nimble/appoutput.txt &
+#echo "APP_CMD=$APP_CMD"
+#APP_CMD="$PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM" 
+
+OMP_NUM_THREADS=$OMP_THREADS mpirun -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM | tee -a results_nimble/appoutput.txt &
+
+#stdbuf -oL $APP_CMD 2>&1 | tee -a results_nimble/appoutput.txt &
 
 sleep 5
 
