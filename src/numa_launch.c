@@ -33,7 +33,7 @@ struct bitmask *fastmem_mask = NULL;
 struct bitmask *cpu_mask = NULL;
 
 static int fastmem_node = -1;
-//static int slowmem_node = -1;
+static int slowmem_node = -1;
 static int cpu_node = -1;
 
 //static unsigned long fastmem_size = 0;
@@ -56,7 +56,7 @@ static struct option long_options [] =
 	//{"fast-mem-size", required_argument, 0, 's'},
 
 	{"fast-mem-node", required_argument, 0, 'F'},
-	//{"slow-mem-node", required_argument, 0, 'S'},
+	{"slow-mem-node", required_argument, 0, 'S'},
 
 	{"cpu-node", required_argument, 0, 'C'},
 
@@ -69,7 +69,7 @@ static struct option long_options [] =
 static void usage(const char *appname)
 {
 	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
-	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> -- <cmd> <arg1> ...\n", appname);
+	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> -- <cmd> <arg1> ...\n", appname);
 }
 
 void term_signal(int sig, siginfo_t *siginfo, void *context)
@@ -151,10 +151,10 @@ int main(int argc, char **argv)
 				fastmem_mask = numa_parse_nodestring(optarg);
 				fastmem_node = atoi(optarg);
 				break;
-			//case 'S':
-			//	slowmem_mask = numa_parse_nodestring(optarg);
-			//	slowmem_node = atoi(optarg);
-			//	break;
+			case 'S':
+				slowmem_mask = numa_parse_nodestring(optarg);
+				slowmem_node = atoi(optarg);
+				break;
 			case 'C':
 				cpu_mask = numa_parse_nodestring(optarg);
 				cpu_node = atoi(optarg);
@@ -168,8 +168,8 @@ int main(int argc, char **argv)
 	}
 
 
-	//if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
-	if(fastmem_node == -1 || cpu_node == -1) {
+	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 || strlen(cgroup) == 0) {
+	//if(fastmem_node == -1 || cpu_node == -1) {
 		usage(argv[0]);
 		exit(0);
 	}
@@ -259,7 +259,8 @@ int main(int argc, char **argv)
 		}
 
 
-		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, fastmem_mask->maskp, fastmem_mask->size + 1) < 0) {
+		//if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, fastmem_mask->maskp, fastmem_mask->size + 1) < 0) {
+		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, slowmem_mask->maskp, slowmem_mask->size + 1) < 0) {
 			fprintf(stderr, "failed set_mempolicy\n");
 			exit(-1);
 		}
