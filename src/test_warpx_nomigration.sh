@@ -164,15 +164,15 @@ mkdir results_nimble
 #echo "APP_CMD=$APP_CMD"
 #APP_CMD="$PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM" 
 
-OMP_NUM_THREADS=$OMP_THREADS mpirun -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM | tee -a results_nimble/appoutput.$$.txt &
+OMP_NUM_THREADS=$OMP_THREADS mpirun -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM | tee -a results_nimble/appoutput_nomigration.$$.txt 
 
 #stdbuf -oL $APP_CMD 2>&1 | tee -a results_nimble/appoutput.txt &
 
-sleep 5
+#sleep 5
 
-child_pids="`jobs -p`"
+#child_pids="`jobs -p`"
 
-echo "Started child pids: $child_pids" 
+#echo "Started child pids: $child_pids" 
 
-kill -ALRM $$
+#kill -ALRM $$
 
