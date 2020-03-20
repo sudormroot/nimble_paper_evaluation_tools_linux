@@ -29,7 +29,7 @@
 #define MPOL_F_MEMCG    (1<<13)
 
 struct bitmask *fastmem_mask = NULL;
-//struct bitmask *slowmem_mask = NULL;
+struct bitmask *slowmem_mask = NULL;
 struct bitmask *cpu_mask = NULL;
 
 static int fastmem_node = -1;
