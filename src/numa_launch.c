@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 		close(fd);
 #endif
 
-        if(strcpy(cpu_node, "all") != 0) {
+        if(cpu_mask) {
             if (numa_run_on_node_mask_all(cpu_mask) < 0) {
                 fprintf(stderr, "failed to bind on numa node #%s\n", cpu_node);
                 exit(-1);
