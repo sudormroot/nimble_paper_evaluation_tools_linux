@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 	}
 
 
-	if(fastmem_node[0] == 0 || slowmem_node[0] == 0/* || cpu_node[0] == 0 */) {
+	if(fastmem_mask == NULL || slowmem_mask == NULL /* || cpu_node[0] == 0 */) {
 	//if(fastmem_node == -1 || cpu_node == -1) {
         printf("--fast-mem-node or --slow-mem-node must be set\n");
 		usage(argv[0]);
