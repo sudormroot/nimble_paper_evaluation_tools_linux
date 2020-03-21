@@ -122,10 +122,13 @@ int main(int argc, char **argv)
 	int len = 0;
 	int found = 0;
 
+    printf("argc=%d\n", argc);
+
 	if(argc < 6) {
 		usage(argv[0]);
 		exit(0);
 	}
+
 
 
 	for(i = 0; i < argc; i++) {
@@ -164,11 +167,11 @@ int main(int argc, char **argv)
                 strcpy(slowmem_node, optarg);
 				break;
 			case 'C':
+                strcpy(cpu_node, optarg);
                 if(strcpy(optarg, "all") != 0) {
 				    cpu_mask = numa_parse_nodestring(optarg);
 				    //cpu_node = atoi(optarg);
                 }
-                strcpy(cpu_node, optarg);
 				break;
 			//case 'c':
 			//	(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
