@@ -9,10 +9,16 @@ problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-accelera
 
 
 #./launch_warpx.sh 0-1 0 2 2 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
+#./launch_warpx.sh 0 0 2 2 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
+#./launch_warpx.sh 0 0 2 6 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
+#./launch_warpx.sh 0-1 0-1 2-3 6 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
+#./launch_warpx.sh 0 0 2 6 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
 
 #./launch_warpx.sh 0-1 0-1 2-3 6 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
 
 
+CPUNODES="0-1"
+FASTNODES="0-1"
 
 mkdir $result_home 2>/dev/zero
 chown -R jiaolin $result_home 2>/dev/zero

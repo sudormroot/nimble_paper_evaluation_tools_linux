@@ -164,8 +164,10 @@ int main(int argc, char **argv)
                 strcpy(slowmem_node, optarg);
 				break;
 			case 'C':
-				cpu_mask = numa_parse_nodestring(optarg);
-				//cpu_node = atoi(optarg);
+                if(strcpy(optarg, "all") == 0) {
+				    cpu_mask = numa_parse_nodestring(optarg);
+				    //cpu_node = atoi(optarg);
+                }
                 strcpy(cpu_node, optarg);
 				break;
 			//case 'c':
@@ -262,11 +264,12 @@ int main(int argc, char **argv)
 		close(fd);
 #endif
 
-		if (numa_run_on_node_mask_all(cpu_mask) < 0) {
-			fprintf(stderr, "failed to bind on numa node #%s\n", cpu_node);
-			exit(-1);
-		}
-
+        if(strcpy(cpu_node, "all") != 0) {
+            if (numa_run_on_node_mask_all(cpu_mask) < 0) {
+                fprintf(stderr, "failed to bind on numa node #%s\n", cpu_node);
+                exit(-1);
+            }
+        }
 
 		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, slowmem_mask->maskp, slowmem_mask->size + 1) < 0) {
 		//if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, fastmem_mask->maskp, fastmem_mask->size + 1) < 0) {
