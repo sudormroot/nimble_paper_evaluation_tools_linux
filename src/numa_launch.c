@@ -164,7 +164,7 @@ int main(int argc, char **argv)
                 strcpy(slowmem_node, optarg);
 				break;
 			case 'C':
-                if(strcpy(optarg, "all") == 0) {
+                if(strcpy(optarg, "all") != 0) {
 				    cpu_mask = numa_parse_nodestring(optarg);
 				    //cpu_node = atoi(optarg);
                 }
