@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     memset(slowmem_node, 0, sizeof(slowmem_node));
     
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
-	while ((c = getopt_long(argc, argv, "F:C:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "S:F:C:", long_options, &option_index)) != -1) {
 
 		switch (c) {
 			//case 's':
@@ -186,9 +186,14 @@ int main(int argc, char **argv)
 	}
 
 
-	if(fastmem_mask == NULL || slowmem_mask == NULL /* || cpu_node[0] == 0 */) {
-	//if(fastmem_node == -1 || cpu_node == -1) {
-        printf("Option '--fast-mem-node' or '--slow-mem-node' must be set\n");
+	if(fastmem_mask == NULL) {
+        printf("Option '--fast-mem-node' must be set\n");
+		usage(argv[0]);
+		exit(0);
+	}
+
+	if(slowmem_mask == NULL) {
+        printf("Option '--slow-mem-node' must be set\n");
 		usage(argv[0]);
 		exit(0);
 	}
