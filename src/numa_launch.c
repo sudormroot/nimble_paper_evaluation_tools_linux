@@ -154,6 +154,8 @@ int main(int argc, char **argv)
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 	while ((c = getopt_long(argc, argv, "C:S:F:", long_options, &option_index)) != -1) {
 
+        option_index=0;
+
 		switch (c) {
 			//case 's':
 			//	fastmem_size = atol(optarg);
