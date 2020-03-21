@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 	}
 
 
-	if(fastmem_node[0] == 0 || slowmem_node[0] == 0 || cpu_node[0] == 0 ) {
+	if(fastmem_node[0] == 0 || slowmem_node[0] == 0/* || cpu_node[0] == 0 */) {
 	//if(fastmem_node == -1 || cpu_node == -1) {
 		usage(argv[0]);
 		exit(0);
