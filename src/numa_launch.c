@@ -32,9 +32,9 @@ struct bitmask *fastmem_mask = NULL;
 struct bitmask *slowmem_mask = NULL;
 struct bitmask *cpu_mask = NULL;
 
-static int fastmem_node = -1;
-static int slowmem_node = -1;
-static int cpu_node = -1;
+static char fastmem_node[128];
+static char slowmem_node[128];
+static char cpu_node[128];
 
 //static unsigned long fastmem_size = 0;
 
@@ -70,6 +70,8 @@ static void usage(const char *appname)
 {
 	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> -- <cmd> <arg1> ...\n", appname);
+	printf("Ex #1: %s --cpu-node=1 --fast-mem-node=0 --slow-mem-node=1 -- find .\n", appname);
+	printf("Ex #2: %s --cpu-node=0-1 --fast-mem-node=0-1 --slow-mem-node=2-3 -- find .\n", appname);
 }
 
 void term_signal(int sig, siginfo_t *siginfo, void *context)
@@ -140,6 +142,10 @@ int main(int argc, char **argv)
 
 	//memset(cgroup, 0, sizeof(cgroup));
 
+    memset(cpu_node, 0, sizeof(cpu_node));
+    memset(fastmem_node, 0, sizeof(fastmem_node));
+    memset(slowmem_node, 0, sizeof(slowmem_node));
+    
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
 	while ((c = getopt_long(argc, argv, "F:C:", long_options, &option_index)) != -1) {
 
@@ -149,15 +155,18 @@ int main(int argc, char **argv)
 			//	break;
 			case 'F':
 				fastmem_mask = numa_parse_nodestring(optarg);
-				fastmem_node = atoi(optarg);
+				//fastmem_node = atoi(optarg);
+                strcpy(fastmem_node, optarg);
 				break;
 			case 'S':
 				slowmem_mask = numa_parse_nodestring(optarg);
-				slowmem_node = atoi(optarg);
+				//slowmem_node = atoi(optarg);
+                strcpy(slowmem_node, optarg);
 				break;
 			case 'C':
 				cpu_mask = numa_parse_nodestring(optarg);
-				cpu_node = atoi(optarg);
+				//cpu_node = atoi(optarg);
+                strcpy(cpu_node, optarg);
 				break;
 			//case 'c':
 			//	(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
@@ -168,7 +177,7 @@ int main(int argc, char **argv)
 	}
 
 
-	if(fastmem_node == -1 || slowmem_node == -1 || cpu_node == -1 ) {
+	if(fastmem_node[0] == 0 || slowmem_node[0] == 0 || cpu_node[0] == 0 ) {
 	//if(fastmem_node == -1 || cpu_node == -1) {
 		usage(argv[0]);
 		exit(0);
@@ -254,7 +263,7 @@ int main(int argc, char **argv)
 #endif
 
 		if (numa_run_on_node_mask_all(cpu_mask) < 0) {
-			fprintf(stderr, "failed to bind on numa node #%d\n", cpu_node);
+			fprintf(stderr, "failed to bind on numa node #%s\n", cpu_node);
 			exit(-1);
 		}
 
@@ -291,7 +300,7 @@ int main(int argc, char **argv)
 #endif
 
 		//printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
-		printf("Launch application %s on cpu node #%d fastmem_node #%d  ...\n", argv[0], cpu_node, fastmem_node);
+		printf("Launch application %s on cpu node #%s fastmem_node #%s  ...\n", argv[0], cpu_node, fastmem_node);
 
 		//free(cmdline);
 
