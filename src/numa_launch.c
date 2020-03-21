@@ -268,8 +268,8 @@ int main(int argc, char **argv)
 		}
 
 
-		//if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, slowmem_mask->maskp, slowmem_mask->size + 1) < 0) {
-		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, fastmem_mask->maskp, fastmem_mask->size + 1) < 0) {
+		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, slowmem_mask->maskp, slowmem_mask->size + 1) < 0) {
+		//if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, fastmem_mask->maskp, fastmem_mask->size + 1) < 0) {
 			fprintf(stderr, "failed set_mempolicy\n");
 			exit(-1);
 		}
