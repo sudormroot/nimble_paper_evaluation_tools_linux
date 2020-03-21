@@ -186,13 +186,13 @@ int main(int argc, char **argv)
 	}
 
 
-	if(fastmem_mask == NULL) {
+	if(fastmem_node[0] == 0) {
         printf("Option '--fast-mem-node' must be set\n");
 		usage(argv[0]);
 		exit(0);
 	}
 
-	if(slowmem_mask == NULL) {
+	if(slowmem_node[0] == 0) {
         printf("Option '--slow-mem-node' must be set\n");
 		usage(argv[0]);
 		exit(0);
