@@ -158,18 +158,18 @@ int main(int argc, char **argv)
 			//	fastmem_size = atol(optarg);
 			//	break;
 			case 'F':
+                strcpy(fastmem_node, optarg);
 				fastmem_mask = numa_parse_nodestring(optarg);
-                //strcpy(fastmem_node, optarg);
                 printf("fastmem_node=%s\n", optarg);
 				break;
 			case 'S':
+                strcpy(slowmem_node, optarg);
 				slowmem_mask = numa_parse_nodestring(optarg);
-                //strcpy(slowmem_node, optarg);
                 printf("slowmem_node=%s\n", optarg);
 				break;
 			case 'C':
                 printf("cpu_node=%s\n", optarg);
-                //strcpy(cpu_node, optarg);
+                strcpy(cpu_node, optarg);
                 if(strcpy(optarg, "all") != 0) {
 				    cpu_mask = numa_parse_nodestring(optarg);
 				    //cpu_node = atoi(optarg);
