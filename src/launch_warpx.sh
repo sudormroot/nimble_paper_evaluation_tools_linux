@@ -71,6 +71,16 @@ NIMBLE_CONTROL_OPTIONS="--exchange-pages"
 
 handle_signal_ALRM() {
 	
+    check_status="`ps -ax|grep numa_launch|sed '/grep/d'`"
+
+    if [ "$check_status" = "" ];then
+        echo "Detected warpx exited."
+        sudo killall warpx_3d 2>/dev/zero
+        sudo rmdir /sys/fs/cgroup/"$CGROUP" 2>/dev/zero
+        sudo rmdir /sys/fs/cgroup/test_* 2>/dev/zero
+        exit
+    fi
+
     child_pids="`ps -ax|grep warpx|sed '/grep/d'|sed '/mpirun/d'|sed '/numa_launch/d'|sed '/sh/d'|awk '{print $1}'`"
 
 	#echo "Warpx pids: $child_pids"
