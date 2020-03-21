@@ -152,7 +152,7 @@ int main(int argc, char **argv)
     memset(slowmem_node, 0, sizeof(slowmem_node));
     
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
-	while ((c = getopt_long(argc, argv, "HS:C:F:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "H:S:C:F:", long_options, &option_index)) != -1) {
 
 		switch (c) {
 			//case 's':
@@ -160,19 +160,19 @@ int main(int argc, char **argv)
 			//	break;
 			case 'F':
                 strcpy(fastmem_node, optarg);
-				fastmem_mask = numa_parse_nodestring(optarg);
+				fastmem_mask = numa_parse_nodestring(fastmem_node);
                 printf("fastmem_node=%s\n", optarg);
 				break;
 			case 'S':
                 strcpy(slowmem_node, optarg);
-				slowmem_mask = numa_parse_nodestring(optarg);
+				slowmem_mask = numa_parse_nodestring(slowmem_node);
                 printf("slowmem_node=%s\n", optarg);
 				break;
 			case 'C':
                 printf("cpu_node=%s\n", optarg);
                 strcpy(cpu_node, optarg);
                 if(strcpy(optarg, "all") != 0) {
-				    cpu_mask = numa_parse_nodestring(optarg);
+				    cpu_mask = numa_parse_nodestring(cpu_node);
 				    //cpu_node = atoi(optarg);
                 }
 				break;
