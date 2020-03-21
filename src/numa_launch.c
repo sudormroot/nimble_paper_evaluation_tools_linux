@@ -57,12 +57,11 @@ static struct option long_options [] =
 
 	{"fast-mem-node", required_argument, 0, 'F'},
 	{"slow-mem-node", required_argument, 0, 'S'},
-
 	{"cpu-node", required_argument, 0, 'C'},
 
 	//{"cgroup", required_argument, 0, 'c'},
 
-	{"help", required_argument, 0, 'H'},
+	//{"help", required_argument, 0, 'H'},
 	{0,0,0,0}
 };
 
@@ -151,15 +150,11 @@ int main(int argc, char **argv)
     memset(fastmem_node, 0, sizeof(fastmem_node));
     memset(slowmem_node, 0, sizeof(slowmem_node));
     
-	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
-	while ((c = getopt_long(argc, argv, "C:S:F:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "F:S:C:", long_options, &option_index)) != -1) {
 
         option_index=0;
 
 		switch (c) {
-			//case 's':
-			//	fastmem_size = atol(optarg);
-			//	break;
 			case 'F':
                 strcpy(fastmem_node, optarg);
 				fastmem_mask = numa_parse_nodestring(fastmem_node);
@@ -173,17 +168,16 @@ int main(int argc, char **argv)
 			case 'C':
                 printf("cpu_node=%s\n", optarg);
                 strcpy(cpu_node, optarg);
-                if(strcpy(optarg, "all") != 0) {
+                if(strcmp(optarg, "all") != 0) {
 				    cpu_mask = numa_parse_nodestring(cpu_node);
 				    //cpu_node = atoi(optarg);
                 }
 				break;
-			//case 'c':
-			//	(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
-			//	break;
 			default:
+		        usage(argv[0]);
+		        exit(0);
 				//abort();
-                break;
+                //break;
 		}
 	}
 
