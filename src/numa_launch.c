@@ -161,11 +161,13 @@ int main(int argc, char **argv)
 				fastmem_mask = numa_parse_nodestring(optarg);
 				//fastmem_node = atoi(optarg);
                 strcpy(fastmem_node, optarg);
+                printf("fastmem_node=%s\n", fastmem_node);
 				break;
 			case 'S':
 				slowmem_mask = numa_parse_nodestring(optarg);
 				//slowmem_node = atoi(optarg);
                 strcpy(slowmem_node, optarg);
+                printf("slowmem_node=%s\n", slowmem_node);
 				break;
 			case 'C':
                 strcpy(cpu_node, optarg);
@@ -173,6 +175,7 @@ int main(int argc, char **argv)
 				    cpu_mask = numa_parse_nodestring(optarg);
 				    //cpu_node = atoi(optarg);
                 }
+                printf("cpu_node=%s\n", cpu_node);
 				break;
 			//case 'c':
 			//	(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
@@ -185,7 +188,7 @@ int main(int argc, char **argv)
 
 	if(fastmem_mask == NULL || slowmem_mask == NULL /* || cpu_node[0] == 0 */) {
 	//if(fastmem_node == -1 || cpu_node == -1) {
-        printf("--fast-mem-node or --slow-mem-node must be set\n");
+        printf("Option '--fast-mem-node' or '--slow-mem-node' must be set\n");
 		usage(argv[0]);
 		exit(0);
 	}
