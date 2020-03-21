@@ -2,17 +2,18 @@
 
 
 
-if [ "$#" -ne 7 ];then
-    echo "$0 <mpi-ranks> <omp-threads> <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>"
+if [ "$#" -ne 10 ];then
+    echo "$0 <cpu-node> <fast-node> <slow-node> <mpi-ranks> <omp-threads> <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>"
     exit
 fi
 
-MPI_RANKS="$1"
-OMP_THREADS="$2"
 
-SLOW_NODE="2-3"
-FAST_NODE="0-1"
-CPU_NODE="0-1"
+CPU_NODE="$1"
+FAST_NODE="$2"
+SLOW_NODE="$3"
+
+MPI_RANKS="$4"
+OMP_THREADS="$5"
 
 CGROUP="test_optane"
 
@@ -25,30 +26,32 @@ DROP_CACHES_INTERVAL=3	    #drop caches for every 3 seconds
 MIGRATION_BATCH_SIZE=8
 
 MAX_MEM_SIZE="0"
-FAST_MEM_SIZE="$3"
-MIGRATION_THREADS_NUM="$4"
+FAST_MEM_SIZE="$6"
+MIGRATION_THREADS_NUM="$7"
 THP_MIGRATION="0"
 
-MIGRATION_INTERVAL="$5"
+MIGRATION_INTERVAL="$8"
 
-WARPX_EXE="$6"
-WARPX_PROBLEM="$7"
+WARPX_EXE="$9"
+WARPX_PROBLEM="${10}"
 
 PROG_HOME="`dirname $0`"
 
 
 echo "THP_MIGRATION=$THP_MIGRATION" 
-echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION"
+#echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION"
 echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" 
-echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" 
-echo "KILL_TIMEOUT=$KILL_TIMEOUT" 
+echo "MIGRATION_BATCH_SIZE=$MIGRATION_BATCH_SIZE"
+echo "MIGRATION_THREADS_NUM=$MIGRATION_THREADS_NUM" 
+#echo "KILL_TIMEOUT=$KILL_TIMEOUT" 
+echo "CPU_NODE=$CPU_NODE"
 echo "FAST_NODE=$FAST_NODE"
 echo "SLOW_NODE=$SLOW_NODE"
 echo "MIGRATION_INTERVAL=$MIGRATION_INTERVAL"
 echo "WARPX_EXE=$WARPX_EXE"
 echo "WARPX_PROBLEM=$WARPX_PROBLEM"
 
-
+#exit
 
 #
 # cleanup
