@@ -268,7 +268,8 @@ int main(int argc, char **argv)
 		}
 
 
-		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, slowmem_mask->maskp, slowmem_mask->size + 1) < 0) {
+		//if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, slowmem_mask->maskp, slowmem_mask->size + 1) < 0) {
+		if (set_mempolicy(MPOL_PREFERRED|MPOL_F_MEMCG, fastmem_mask->maskp, fastmem_mask->size + 1) < 0) {
 			fprintf(stderr, "failed set_mempolicy\n");
 			exit(-1);
 		}
@@ -300,7 +301,7 @@ int main(int argc, char **argv)
 #endif
 
 		//printf("Launch application %s on cpu node #%d fastmem_size %lu MB fastmem_node #%d slowmem_node #%d ...\n", cmdline, cpu_node, fastmem_size, fastmem_node, slowmem_node);
-		printf("Launch application %s on cpu node #%s fastmem_node #%s  ...\n", argv[0], cpu_node, fastmem_node);
+		printf("Launch application %s on cpu node #%s fastmem_node #%s  slowmem_node #%s ...\n", argv[0], cpu_node, fastmem_node, slowmem_node);
 
 		//free(cmdline);
 
