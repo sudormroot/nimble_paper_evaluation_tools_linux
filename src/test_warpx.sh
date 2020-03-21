@@ -3,13 +3,12 @@
 #./launch_warpx.sh <mpi-ranks> <omp-threads> <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>
 
 
-mkdir /home/jiaolin/warpx_pmdk_test/results_nimble 2>/dev/zero
-chown -R jiaolin /home/jiaolin/warpx_pmdk_test/results_nimble 2>/dev/zero
-
 result_home="/home/jiaolin/warpx_pmdk_test/results_nimble"
 warpx_exe="/home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d"
 problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration"
 
+mkdir $result_home 2>/dev/zero
+chown -R jiaolin $result_home 2>/dev/zero
 
 problem="test_3d_64x64x512_steps_200"
 problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_200"
