@@ -10,8 +10,8 @@ fi
 MPI_RANKS="$1"
 OMP_THREADS="$2"
 
-SLOW_NODE=2
-FAST_NODE=0
+#SLOW_NODE=2
+#FAST_NODE=0
 
 
 CGROUP="test_optane"
@@ -42,8 +42,8 @@ echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION"
 echo "FAST_MEM_SIZE=$FAST_MEM_SIZE MB" 
 echo "MIGRATION_THREADS_NUM=$FAST_MEM_SIZE" 
 echo "KILL_TIMEOUT=$KILL_TIMEOUT" 
-echo "FAST_NODE=$FAST_NODE"
-echo "SLOW_NODE=$SLOW_NODE"
+#echo "FAST_NODE=$FAST_NODE"
+#echo "SLOW_NODE=$SLOW_NODE"
 echo "MIGRATION_INTERVAL=$MIGRATION_INTERVAL"
 echo "WARPX_EXE=$WARPX_EXE"
 echo "WARPX_PROBLEM=$WARPX_PROBLEM"
@@ -92,7 +92,8 @@ handle_signal_ALRM() {
 	    if [ "$pid" != "" ];then
 		    #echo "Page migration start ..."
 		    #Trigger Nimble kernel part to do migration
-		    $PROG_HOME/nimble_control --pid=$pid --fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE $NIMBLE_CONTROL_OPTIONS
+		    $PROG_HOME/nimble_control --pid=$pid --fast-mem-node=0 --slow-mem-node=2 $NIMBLE_CONTROL_OPTIONS
+		    $PROG_HOME/nimble_control --pid=$pid --fast-mem-node=1 --slow-mem-node=3 $NIMBLE_CONTROL_OPTIONS
 		    #echo "Page migration start end: ret=$?"
 	    fi
     done
@@ -154,8 +155,15 @@ echo "Set vm/migration_batch_size=$MIGRATION_BATCH_SIZE"
 
 FAST_MEM_SIZE_BYTES="`expr $FAST_MEM_SIZE \\* 1024 \\* 1024`"
 
-echo "$FAST_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE
-echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:$FAST_NODE to $FAST_MEM_SIZE MB" 
+FAST_MEM_SIZE_BYTES="`echo $FAST_MEM_SIZE_BYTES / 2|bc`"
+FAST_MEM_SIZE="`echo $FAST_MEM_SIZE / 2|bc`"
+
+
+echo "$FAST_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max_at_node:0
+echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:0 to $FAST_MEM_SIZE MB" 
+
+echo "$FAST_MEM_SIZE_BYTES" | sudo tee /sys/fs/cgroup/$CGROUP/memory.max_at_node:1
+echo "Set /sys/fs/cgroup/$CGROUP/memory.max_at_node:1 to $FAST_MEM_SIZE MB" 
 
 sudo sysctl vm/limit_mt_num=$MIGRATION_THREADS_NUM
 echo "Set vm/limit_mt_num=$MIGRATION_THREADS_NUM"
@@ -169,14 +177,10 @@ echo "$pid" | sudo tee /sys/fs/cgroup/$CGROUP/cgroup.procs
 echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid" 
 
 
-#mkdir results_nimble
-
-#echo "APP_CMD=$APP_CMD"
-#APP_CMD="$PROG_HOME/numa_launch --cpu-node=$FAST_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM" 
 
 problem_name="`basename $WARPX_PROBLEM`"
 
-OMP_NUM_THREADS=$OMP_THREADS mpirun -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=$FAST_NODE --slow-mem-node=$SLOW_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM &
+OMP_NUM_THREADS=$OMP_THREADS mpirun -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=0-1 --slow-mem-node=2-3 --fast-mem-node=0-1 -- $WARPX_EXE $WARPX_PROBLEM &
 
 #stdbuf -oL $APP_CMD 2>&1 | tee -a results_nimble/appoutput.txt &
 
