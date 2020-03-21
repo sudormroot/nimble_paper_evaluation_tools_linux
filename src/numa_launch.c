@@ -70,8 +70,8 @@ static void usage(const char *appname)
 {
 	//printf("%s --cgroup=<cgroup> --cpu-node=<cpu-node> [--fast-mem-size=<fast-mem-size-in-mb>] --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node>\n", appname);
 	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> -- <cmd> <arg1> ...\n", appname);
-	printf("Ex #1: %s --cpu-node=1 --fast-mem-node=0 --slow-mem-node=1 -- find .\n", appname);
-	printf("Ex #2: %s --cpu-node=0-1 --fast-mem-node=0-1 --slow-mem-node=2-3 -- find .\n", appname);
+	printf("Ex #1: %s --cpu-node=1 --fast-mem-node=0 --slow-mem-node=1 -- ls\n", appname);
+	printf("Ex #2: %s --cpu-node=0-1 --fast-mem-node=0-1 --slow-mem-node=2-3 -- ls\n", appname);
 }
 
 void term_signal(int sig, siginfo_t *siginfo, void *context)
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     memset(slowmem_node, 0, sizeof(slowmem_node));
     
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
-	while ((c = getopt_long(argc, argv, "S:F:C:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "C:F:S:", long_options, &option_index)) != -1) {
 
 		switch (c) {
 			//case 's':
