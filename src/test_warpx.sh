@@ -8,6 +8,7 @@ warpx_exe="/home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d"
 problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration"
 
 #./launch_warpx.sh 6 8 20000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096_steps_200
+#./launch_warpx.sh 6 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512_steps_200
 
 
 mkdir $result_home 2>/dev/zero
