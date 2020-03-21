@@ -62,7 +62,7 @@ static struct option long_options [] =
 
 	//{"cgroup", required_argument, 0, 'c'},
 
-	{0,0,0,0}
+	//{0,0,0,0}
 };
 
 
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     memset(slowmem_node, 0, sizeof(slowmem_node));
     
 	//while ((c = getopt_long(argc, argv, "s:F:S:C:c:", long_options, &option_index)) != -1) {
-	while ((c = getopt_long(argc, argv, "hS:C:F:", long_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "h:S:C:F:", long_options, &option_index)) != -1) {
 
 		switch (c) {
 			//case 's':
