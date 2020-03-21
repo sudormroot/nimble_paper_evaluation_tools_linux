@@ -72,6 +72,7 @@ static void usage(const char *appname)
 	printf("%s --cpu-node=<cpu-node> --fast-mem-node=<fast-mem-node> --slow-mem-node=<slow-mem-node> -- <cmd> <arg1> ...\n", appname);
 	printf("Ex #1: %s --cpu-node=1 --fast-mem-node=0 --slow-mem-node=1 -- ls\n", appname);
 	printf("Ex #2: %s --cpu-node=0-1 --fast-mem-node=0-1 --slow-mem-node=2-3 -- ls\n", appname);
+	printf("Ex #3: %s --cpu-node=any --fast-mem-node=0-1 --slow-mem-node=2-3 -- ls\n", appname);
 }
 
 void term_signal(int sig, siginfo_t *siginfo, void *context)
@@ -158,17 +159,17 @@ int main(int argc, char **argv)
 			case 'F':
                 strcpy(fastmem_node, optarg);
 				fastmem_mask = numa_parse_nodestring(fastmem_node);
-                printf("fastmem_node=%s\n", optarg);
+            //    printf("fastmem_node=%s\n", optarg);
 				break;
 			case 'S':
                 strcpy(slowmem_node, optarg);
 				slowmem_mask = numa_parse_nodestring(slowmem_node);
-                printf("slowmem_node=%s\n", optarg);
+              //  printf("slowmem_node=%s\n", optarg);
 				break;
 			case 'C':
-                printf("cpu_node=%s\n", optarg);
+                //printf("cpu_node=%s\n", optarg);
                 strcpy(cpu_node, optarg);
-                if(strcmp(optarg, "all") != 0) {
+                if(strcmp(optarg, "any") != 0) {
 				    cpu_mask = numa_parse_nodestring(cpu_node);
 				    //cpu_node = atoi(optarg);
                 }
