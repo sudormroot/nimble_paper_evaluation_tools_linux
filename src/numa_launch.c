@@ -159,23 +159,21 @@ int main(int argc, char **argv)
 			//	break;
 			case 'F':
 				fastmem_mask = numa_parse_nodestring(optarg);
-				//fastmem_node = atoi(optarg);
-                strcpy(fastmem_node, optarg);
-                printf("fastmem_node=%s\n", fastmem_node);
+                //strcpy(fastmem_node, optarg);
+                printf("fastmem_node=%s\n", optarg);
 				break;
 			case 'S':
 				slowmem_mask = numa_parse_nodestring(optarg);
-				//slowmem_node = atoi(optarg);
-                strcpy(slowmem_node, optarg);
-                printf("slowmem_node=%s\n", slowmem_node);
+                //strcpy(slowmem_node, optarg);
+                printf("slowmem_node=%s\n", optarg);
 				break;
 			case 'C':
-                strcpy(cpu_node, optarg);
+                printf("cpu_node=%s\n", optarg);
+                //strcpy(cpu_node, optarg);
                 if(strcpy(optarg, "all") != 0) {
 				    cpu_mask = numa_parse_nodestring(optarg);
 				    //cpu_node = atoi(optarg);
                 }
-                printf("cpu_node=%s\n", cpu_node);
 				break;
 			//case 'c':
 			//	(void)snprintf(cgroup, sizeof(cgroup), "%s", optarg);
