@@ -270,10 +270,13 @@ int main(int argc, char **argv)
 
 
 	max_nodes = numa_num_possible_nodes();
-
+#if 1
 	//printf("Trigger page migration pid = %d slow #%d -> fast #%d managed_pages = %lu ...\n", pid, slowmem_node, fastmem_node, managed_pages);
-
 	ret = syscall(syscall_mm_manage, pid, managed_pages, max_nodes + 1, slowmem_mask->maskp, fastmem_mask->maskp, mm_manage_flags);
+#else
+	//printf("Trigger page migration pid = %d fast #%d -> slow #%d managed_pages = %lu ...\n", pid, fastwmem_node, slowmem_node, managed_pages);
+	ret = syscall(syscall_mm_manage, pid, managed_pages, max_nodes + 1, fastmem_mask->maskp, slowmem_mask->maskp, mm_manage_flags);
+#endif
 	if(ret)
 		fprintf(stderr, "Page migration failed pid = %d, ret = %d\n", pid, ret);
 	//else

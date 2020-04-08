@@ -8,23 +8,43 @@ warpx_exe="/home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d"
 problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration"
 
 
-
-#./launch_warpx.sh 0 0 2 6 8 40 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
-#./launch_warpx.sh 0 0 2 2 8 40 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
-
-#./launch_warpx.sh 0 0 2 6 8 310 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
-#./launch_warpx.sh 0 0 2 2 8 310 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
-
-
-#./launch_warpx.sh 0 0 2 6 8 2500 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
-#./launch_warpx.sh 0 0 2 2 8 2500 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
-
-#./launch_warpx.sh 0 0 2 6 8 20000 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096
-#./launch_warpx.sh 0 0 2 2 8 20000 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096
+#./launch_warpx.sh 0 0 2 3 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
+#./launch_warpx.sh 0 0 2 3 8 310 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
+#./launch_warpx.sh 0 0 2 3 8 2500 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
+#nohup ./launch_warpx.sh 0 0 2 3 8 20000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096 &
+#nohup ./launch_warpx.sh 0 0 2 3 8 100000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200 &
+#nohup ./launch_warpx.sh 0 0 2 3 8 135000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680 &
 
 
-#nohup sh ./launch_warpx.sh 0 0-1 2-3 6 8 20000 8 3 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680 &
 
+#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
+#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
+#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
+
+#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
+#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
+#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
+
+#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096
+#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096
+#nohup ./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096 &
+
+
+
+#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
+#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
+#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
+
+#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200
+#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200
+#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200
+
+
+#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680
+#nohup ./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680 &
+#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680
+
+exit
 
 CPUNODES="0-1"
 FASTNODES="0-1"

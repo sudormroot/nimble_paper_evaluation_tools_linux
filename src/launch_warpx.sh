@@ -2,20 +2,14 @@
 
 
 
-if [ "$#" -ne 10 ];then
-    echo "$0 <cpu-node> <fast-node> <slow-node> <mpi-ranks> <omp-threads> <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>"
-    exit
-fi
+FAST_NODE="0"
+SLOW_NODE="2"
+CPU_NODE="$SLOW_NODE"
 
+MPI_RANKS="1"
+OMP_THREADS="1"
 
-CPU_NODE="$1"
-FAST_NODE="$2"
-SLOW_NODE="$3"
-
-MPI_RANKS="$4"
-OMP_THREADS="$5"
-
-CGROUP="test_optane"
+CGROUP="test_optane.$$"
 
 MAX_MEM_SIZE_BYTES=0
 
@@ -25,18 +19,109 @@ DROP_CACHES_INTERVAL=3	    #drop caches for every 3 seconds
 
 MIGRATION_BATCH_SIZE=8
 
-MAX_MEM_SIZE="0"
-FAST_MEM_SIZE="$6"
-MIGRATION_THREADS_NUM="$7"
+
+PAGE_SIZE=4096
+MAX_MANAGED_SIZE_MB=512   #unit is in MiB
+MAX_MANAGED_PAGES=`echo "($MAX_MANAGED_SIZE_MB * 1048576) / $PAGE_SIZE" | bc`
+
+MAX_MEM_SIZE="0" 
+FAST_MEM_SIZE="0"
+MIGRATION_THREADS_NUM="1"
 THP_MIGRATION="0"
 
-MIGRATION_INTERVAL="$8"
+MIGRATION_INTERVAL="1"
 
-WARPX_EXE="$9"
-WARPX_PROBLEM="${10}"
 
 PROG_HOME="`dirname $0`"
 
+#############################################
+#   Get parameters                          #
+#############################################
+
+show_usage(){
+    echo "$0 [--cpu-node=<cpu-node>] --fast-node=<fast-node> --slow-node=<slow-node> --mpi-ranks-num=<mpi-ranks> --omp-threads-num=<omp-threads> --fast-mem-size=<fast-mem-size-in-mb> --migration-threads-num=<num-of-migration-threads> --migration-interval==<migration-interval-seconds> <warpx_cmd> <problem>"
+}
+
+if [ "$#" -le 10 ];then
+    show_usage
+    exit
+fi
+
+while [ 1 = 1 ] ; do
+	case "$1" in
+		-c|--cpu-node=*) 
+			CPU_NODE=`echo ${1#*=}`
+			shift 1;;
+		-f|--fast-node=*) 
+			FAST_NODE=`echo ${1#*=}`
+			shift 1;;
+		-s|--slow-node=*) 
+			FAST_NODE=`echo ${1#*=}`
+			shift 1;;
+		-r|--mpi-ranks-num=*) 
+			MPI_RANKS=`echo ${1#*=}`
+			shift 1;;
+		-o|--omp-threads-num=*) 
+			OMP_THREADS=`echo ${1#*=}`
+			shift 1;;
+		-T|--thp-migration=*) 
+			THP_MIGRATION=`echo ${1#*=}`
+			shift 1;;
+		-M|--max-mem-size=*) 
+			MAX_MEM_SIZE=`echo ${1#*=}`
+			shift 1;;
+		-m|--fast-mem-size=*) 
+			FAST_MEM_SIZE=`echo ${1#*=}`
+			shift 1;;
+		-t|--migration-threads-num*) 
+			MIGRATION_THREADS_NUM=`echo ${1#*=}`
+			shift 1 ;;
+		-t|--migration-interval*) 
+			MIGRATION_INTERVAL=`echo ${1#*=}`
+			shift 1 ;;
+		--) 
+			shift 1
+			break ;;
+		*) 
+			break ;;
+	esac
+done
+
+
+#if [ "$THP_MIGRATION" != "0" ] && [ "$THP_MIGRATION" != "1" ]; then
+#	echo "Required --thp_migration=<1|0>"
+#	show_usage
+#	exit
+#fi
+
+
+if [ "$FAST_MEM_SIZE" = "0" ]; then
+	echo "Required --fast-mem-size=<Size-in-MB>"
+	show_usage
+	exit
+fi
+
+#if [ "$MIGRATION_THREADS_NUM" = "0" ]; then
+#	echo "Required --migration-threads-num=<Migration-Threads-Number>"
+#	show_usage
+#	exit
+#fi
+
+
+WARPX_EXE="$1"
+WARPX_PROBLEM="$2"
+
+if [ ! -x "$WARPX_EXE" ];then
+    echo "warpx execution binary not found"
+    show_usage
+    exit
+fi
+
+if [ ! -f "$WARPX_PROBLEM" ];then
+    echo "warpx input problem not found"
+    show_usage
+    exit
+fi
 
 echo "THP_MIGRATION=$THP_MIGRATION" 
 #echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION"
@@ -50,6 +135,8 @@ echo "SLOW_NODE=$SLOW_NODE"
 echo "MIGRATION_INTERVAL=$MIGRATION_INTERVAL"
 echo "WARPX_EXE=$WARPX_EXE"
 echo "WARPX_PROBLEM=$WARPX_PROBLEM"
+echo "MAX_MANAGED_SIZE_MB=$MAX_MANAGED_SIZE_MB MiB"
+echo "MAX_MANAGED_PAGES=$MAX_MANAGED_PAGES"
 
 #exit
 
@@ -100,10 +187,12 @@ handle_signal_ALRM() {
 
 	    if [ "$pid" != "" ];then
 
+            killall nimble_control 2>/dev/zero
+
             for i in "`seq $fastnode_num`";do
                 fastnode="`echo $FAST_NODE|cut -d- -f$i`"
                 slownode="`echo $SLOW_NODE|cut -d- -f$i`"
-		        $PROG_HOME/nimble_control --pid=$pid --fast-mem-node=$fastnode --slow-mem-node=$slownode $NIMBLE_CONTROL_OPTIONS
+		        $PROG_HOME/nimble_control --pid=$pid --managed-pages=$MAX_MANAGED_PAGES --fast-mem-node=$fastnode --slow-mem-node=$slownode $NIMBLE_CONTROL_OPTIONS &
             done
 
 		    #echo "Page migration start ..."

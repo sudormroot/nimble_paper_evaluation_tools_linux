@@ -21,6 +21,10 @@ STATS_COLLECT_INTERVAL=5    #collect system statistics every 5 seconds
 
 MIGRATION_BATCH_SIZE=8
 
+PAGE_SIZE=4096
+MAX_MANAGED_SIZE=512   #unit is in MiB
+MAX_MANAGED_PAGES=`echo "($MAX_MANAGED_SIZE * 1048576) / $PAGE_SIZE" | bc`
+
 MAX_MEM_SIZE="0"
 FAST_MEM_SIZE="0"
 MIGRATION_THREADS_NUM="0"
@@ -165,7 +169,8 @@ echo "FAST_MEM_SIZE=$FAST_MEM_SIZE" >> $CONFIG_FILE
 echo "MIGRATION_THREADS_NUM=$MIGRATION_THREADS_NUM" >> $CONFIG_FILE
 echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" >> $CONFIG_FILE
 echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
-
+echo "MAX_MANAGED_SIZE=$MAX_MANAGED_SIZE MiB"
+echo "MAX_MANAGED_PAGES=$MAX_MANAGED_PAGES"
 
 test_cleanup() {
 	
@@ -297,6 +302,7 @@ handle_signal_ALRM() {
 
 		#Trigger Nimble kernel part to do migration
 		$PROG_HOME/nimble_control 	--pid=$app_pid \
+                                    --managed-pages=$MAX_MANAGED_PAGES \
 									--fast-mem-node=$FAST_NODE --slow-mem-node=$SLOW_NODE \
 									$NIMBLE_CONTROL_OPTIONS >> $LOG_FILE 
 	fi
