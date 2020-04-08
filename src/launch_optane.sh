@@ -11,7 +11,7 @@ SLOW_NODE=2
 FAST_NODE=0
 
 
-CGROUP="test_$$"
+CGROUP="test_optane_$$"
 
 
 MAX_OPEN_FILES=100000

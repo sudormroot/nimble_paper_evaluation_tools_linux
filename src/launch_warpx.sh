@@ -9,7 +9,7 @@ CPU_NODE="$SLOW_NODE"
 MPI_RANKS="1"
 OMP_THREADS="1"
 
-CGROUP="test_optane.$$"
+CGROUP="test_warpx_$$"
 
 MAX_MEM_SIZE_BYTES=0
 
