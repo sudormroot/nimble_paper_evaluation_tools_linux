@@ -2,10 +2,9 @@
 
 
 
-result_home="/home/jiaolin/warpx_pmdk_test/evaluation_nimble"
-warpx_exe="/home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d"
-problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems_repo"
-
+result_home="evaluation_nimble"
+warpx_exe="warpx_build/warpx_3d"
+problem_home="warpx_problems_repo"
 
 script_dir="`dirname $0`"
 
