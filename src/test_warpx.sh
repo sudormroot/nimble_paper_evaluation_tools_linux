@@ -1,98 +1,34 @@
 #!/bin/sh
 
-#./launch_warpx.sh <cpunodes> <fastnodes> <slownodes> <mpi-ranks> <omp-threads> <fast-mem-size-in-mb> <num-of-migration-threads> <migration-interval-seconds> <warpx_cmd> <problem>
 
 
-result_home="/home/jiaolin/warpx_pmdk_test/results_nimble"
+result_home="/home/jiaolin/warpx_pmdk_test/evaluation_nimble"
 warpx_exe="/home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d"
-problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration"
+problem_home="/home/jiaolin/warpx_pmdk_test/warpx_problems_repo"
 
 
-#./launch_warpx.sh 0 0 2 3 8 40 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
-#./launch_warpx.sh 0 0 2 3 8 310 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
-#./launch_warpx.sh 0 0 2 3 8 2500 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
-#nohup ./launch_warpx.sh 0 0 2 3 8 20000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096 &
-#nohup ./launch_warpx.sh 0 0 2 3 8 100000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200 &
-#nohup ./launch_warpx.sh 0 0 2 3 8 135000 8 1 /home/jiaolin/warpx_pmdk_test/warpx_build/warpx_3d /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680 &
+script_dir="`dirname $0`"
 
 
+CPU_NODE=any
+FAST_NODE="0-1"
+SLOW_NODE="2-3"
+MPI_RANKS="6"
+OMP_THREADS="8"
+FAST_MEM_SIZE="128"
+MIGRATION_THREADS="3"
+MIGRATION_INTERVAL="1"
+MAX_MANAGED_SIZE_MB="512"
 
-#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
-#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
-#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_64x64x512
-
-#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
-#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
-#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_128x128x1024
-
-#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096
-#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096
-#nohup ./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_512x512x4096 &
-
-
-
-#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
-#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
-#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_256x256x2048
-
-#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200
-#./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200
-#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_864x864x7200
+$script_dir/launch_warpx.sh --cpu-node=$CPU_NODE \
+                            --fast-node=$FAST_NODE \
+                            --slow-node=$SLOW_NODE \
+                            --mpi-ranks-num=$MPI_RANKS \
+                            --omp-threads-num=$OMP_THREADS \
+                            --fast-mem-size=$FAST_MEM_SIZE \
+                            --migration-threads-num=$MIGRATION_THREADS \
+                            --migration-interval=$MIGRATION_INTERVAL \
+                            --managed-size=$MAX_MANAGED_SIZE_MB \
+                            $warpx_exe $problem_home/
 
 
-#./test.sh ram 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680
-#nohup ./test.sh pm 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680 &
-#./test_migratepages.sh 3 8 /home/jiaolin/warpx_pmdk_test/warpx_problems/laser-driven-acceleration/test_3d_960x960x7680
-
-exit
-
-CPUNODES="0-1"
-FASTNODES="0-1"
-
-mkdir $result_home 2>/dev/zero
-chown -R jiaolin $result_home 2>/dev/zero
-
-problem="test_3d_64x64x512_steps_200"
-problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_200"
-fastmemsize="40"
-mkdir $result_home/$problem_dir 2>/dev/zero
-./launch_warpx.sh 2 8 $fastmemsize 8 1 $warpx_exe "$problem_home/$problem" | tee  $result_home/$problem_dir/appoutput.txt
-
-
-problem="test_3d_128x128x1024_steps_200" 
-problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_200"
-fastmemsize="310"
-mkdir $result_home/$problem_dir 2>/dev/zero
-./launch_warpx.sh 2 8 $fastmemsize 8 1 $warpx_exe "$problem_home/$problem" |tee $result_home/$problem_dir/appoutput.txt
-
-
-problem="test_3d_256x256x2048_steps_200"
-problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_200"
-fastmemsize="2500"
-mkdir $result_home/$problem_dir 2>/dev/zero
-./launch_warpx.sh 2 8 $fastmemsize 8 1 $warpx_exe "$problem_home/$problem" |tee $result_home/$problem_dir/appoutput.txt
-
-
-problem="test_3d_512x512x4096_steps_200"
-problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_200"
-fastmemsize="20000"
-mkdir $result_home/$problem_dir 2>/dev/zero
-./launch_warpx.sh 2 8 $fastmemsize 8 1 $warpx_exe "$problem_home/$problem" |tee $result_home/$problem_dir/appoutput.txt
-
-
-problem="test_3d_864x864x7200" # 10 steps
-problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_10"
-fastmemsize="100000"
-mkdir $result_home/$problem_dir 2>/dev/zero
-./launch_warpx.sh 2 8 $fastmemsize 8 1 $warpx_exe "$problem_home/$problem" |tee $result_home/$problem_dir/appoutput.txt
-
-
-problem="test_3d_960x960x7680_steps_10" # 10 steps
-problem_dir="$problem""_nimble_mpi_2_omp_8_migth_8_migint_1_steps_10"
-fastmemsize="135000"
-mkdir $result_home/$problem_dir 2>/dev/zero
-./launch_warpx.sh 2 8 $fastmemsize 8 1 $warpx_exe "$problem_home/$problem" |tee $result_home/$problem_dir/appoutput.txt
-
-chown -R jiaolin:jiaolin /home/jiaolin/warpx_pmdk_test/results_nimble 2>/dev/zero
-
-echo "--- Finished ---"

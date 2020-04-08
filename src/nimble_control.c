@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 				slowmem_node = atoi(optarg);
 				break;
 			case 'P':
-				if(strcmp(optarg, "max") == 0)
+				if(strcmp(optarg, "max") == 0 || strcmp(optarg, "0") == 0)
 					managed_pages = ULONG_MAX;
 				else
 					managed_pages = atol(optarg);

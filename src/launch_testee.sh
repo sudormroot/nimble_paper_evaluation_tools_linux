@@ -22,8 +22,8 @@ STATS_COLLECT_INTERVAL=5    #collect system statistics every 5 seconds
 MIGRATION_BATCH_SIZE=8
 
 PAGE_SIZE=4096
-MAX_MANAGED_SIZE=512   #unit is in MiB
-MAX_MANAGED_PAGES=`echo "($MAX_MANAGED_SIZE * 1048576) / $PAGE_SIZE" | bc`
+MAX_MANAGED_SIZE_MB=512   #unit is in MiB
+MAX_MANAGED_PAGES=`echo "($MAX_MANAGED_SIZE_MB * 1048576) / $PAGE_SIZE" | bc`
 
 MAX_MEM_SIZE="0"
 FAST_MEM_SIZE="0"
@@ -42,7 +42,7 @@ PROG_HOME="`dirname $0`"
 
 show_usage() {
 	#echo "$0 [--enable-traffic-injection] [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
-	echo "$0 [--kill-timeout=<Seconds-to-Kill>] --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
+	echo "$0 [--kill-timeout=<Seconds-to-Kill>] --managed-size=<managed-size-in-mb> --thp-migration=<1|0> [--max-mem-size=<Size-in-MB>] --fast-mem-size=<Size-in-MB> --migration-threads-num=<Migration-Threads-Number> <Cmd> <Arg1> <Arg2> ..."
 }
 
 if [ ! -f "$PROG_HOME/numa_launch" ] || [ ! -f "$PROG_HOME/nimble_control" ];then
@@ -66,6 +66,9 @@ while [ 1 = 1 ] ; do
 	case "$1" in
 		-k|--kill-timeout=*) 
 			KILL_TIMEOUT=`echo ${1#*=}`
+			shift 1;;
+		-S|--managed-size=*) 
+			MAX_MANAGED_SIZE_MB=`echo ${1#*=}`
 			shift 1;;
 		-T|--thp-migration=*) 
 			THP_MIGRATION=`echo ${1#*=}`
@@ -169,7 +172,7 @@ echo "FAST_MEM_SIZE=$FAST_MEM_SIZE" >> $CONFIG_FILE
 echo "MIGRATION_THREADS_NUM=$MIGRATION_THREADS_NUM" >> $CONFIG_FILE
 echo "ENABLE_TRAFFIC_INJECTION=$ENABLE_TRAFFIC_INJECTION" >> $CONFIG_FILE
 echo "THP_MIGRATION=$THP_MIGRATION" >> $CONFIG_FILE
-echo "MAX_MANAGED_SIZE=$MAX_MANAGED_SIZE MiB"
+echo "MAX_MANAGED_SIZE_MB=$MAX_MANAGED_SIZE_MB MiB"
 echo "MAX_MANAGED_PAGES=$MAX_MANAGED_PAGES"
 
 test_cleanup() {

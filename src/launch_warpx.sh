@@ -39,10 +39,10 @@ PROG_HOME="`dirname $0`"
 #############################################
 
 show_usage(){
-    echo "$0 [--cpu-node=<cpu-node>] --fast-node=<fast-node> --slow-node=<slow-node> --mpi-ranks-num=<mpi-ranks> --omp-threads-num=<omp-threads> --fast-mem-size=<fast-mem-size-in-mb> --migration-threads-num=<num-of-migration-threads> --migration-interval==<migration-interval-seconds> <warpx_cmd> <problem>"
+    echo "$0 [--cpu-node=<cpu-node>] --fast-node=<fast-node> --slow-node=<slow-node> --mpi-ranks-num=<mpi-ranks> --omp-threads-num=<omp-threads> --fast-mem-size=<fast-mem-size-in-mb> --migration-threads-num=<num-of-migration-threads> --migration-interval=<migration-interval-seconds> --managed-size=<managed-size-in-mb> <warpx_cmd> <problem>"
 }
 
-if [ "$#" -le 10 ];then
+if [ "$#" = "0" ];then
     show_usage
     exit
 fi
@@ -57,6 +57,9 @@ while [ 1 = 1 ] ; do
 			shift 1;;
 		-s|--slow-node=*) 
 			FAST_NODE=`echo ${1#*=}`
+			shift 1;;
+		-S|--managed-size=*) 
+			MAX_MANAGED_SIZE_MB=`echo ${1#*=}`
 			shift 1;;
 		-r|--mpi-ranks-num=*) 
 			MPI_RANKS=`echo ${1#*=}`
