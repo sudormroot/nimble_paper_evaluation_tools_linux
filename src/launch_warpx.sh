@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+set -u
 
 FAST_NODE="0"
 SLOW_NODE="2"

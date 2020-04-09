@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+set -u
 
 #
 # Fast node is #1
