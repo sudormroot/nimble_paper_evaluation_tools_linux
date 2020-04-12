@@ -21,7 +21,8 @@ MAX_MANAGED_SIZE_MB="512"
 
 test_problem(){
 	problem="$1"
-	appout_dir="$result_home/$problem"
+	problem_base="`basename $problem`"
+	appout_dir="$result_home/$problem_base"
 	appout="$appout_dir/appout.txt"
 
 	rm -rf $appout_dir 2>/dev/zero
