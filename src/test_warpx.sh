@@ -27,6 +27,8 @@ test_problem(){
 	appout_dir="$result_home/$problem_base"
 	appout="$appout_dir/appout.txt"
 
+	echo "appout=$appout"
+
 	rm -rf $appout_dir 2>/dev/zero
 	mkdir $appout_dir 2>/dev/zero
 
@@ -42,5 +44,6 @@ test_problem(){
                             $warpx_exe $problem | tee $appout
 }
 
+# fastmemsize is 12.8% of footprint
 
-test_problem 128 $problem_home/1_species/laser_3d_512x512x4096_1_species 
+test_problem 10092 $problem_home/1_species/laser_3d_512x512x4096_1_species 
