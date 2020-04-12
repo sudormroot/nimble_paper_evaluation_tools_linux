@@ -56,7 +56,7 @@ while [ 1 = 1 ] ; do
 			FAST_NODE=`echo ${1#*=}`
 			shift 1;;
 		-s|--slow-node=*) 
-			FAST_NODE=`echo ${1#*=}`
+			SLOW_NODE=`echo ${1#*=}`
 			shift 1;;
 		-S|--managed-size=*) 
 			MAX_MANAGED_SIZE_MB=`echo ${1#*=}`
