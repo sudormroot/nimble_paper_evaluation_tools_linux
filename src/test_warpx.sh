@@ -30,7 +30,7 @@ test_problem(){
 	echo "appout=$appout"
 
 	rm -rf $appout_dir 2>/dev/zero
-	mkdir $appout_dir 2>/dev/zero
+	mkdir -p $appout_dir 2>/dev/zero
 
 	$script_dir/launch_warpx.sh --cpu-node=$CPU_NODE \
                             --fast-node=$FAST_NODE \
@@ -47,3 +47,23 @@ test_problem(){
 # fastmemsize is 12.8% of footprint
 
 test_problem 10092 $problem_home/1_species/laser_3d_512x512x4096_1_species 
+
+test_problem 50528 $problem_home/1_species/laser_3d_864x864x7200_1_species
+
+test_problem 67108 $problem_home/1_species/laser_3d_960x960x7680_1_species
+
+test_problem 34406 $problem_home/1_species/uniform_plasma_384x384x3104_1_species
+
+test_problem 80530 $problem_home/1_species/uniform_plasma_512x512x4096_1_species
+
+test_problem 30277 $problem_home/3_species/laser_3d_512x512x4096_3_species
+
+test_problem 80530 $problem_home/3_species/laser_3d_704x704x5664_3_species
+
+test_problem 20054 $problem_home/5_species/beam_3d_boost_512x512x4096_5_species
+
+test_problem 62914 $problem_home/5_species/beam_3d_boost_864x864x7200_5_species
+
+
+
+
