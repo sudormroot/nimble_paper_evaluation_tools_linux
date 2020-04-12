@@ -9,7 +9,7 @@ problem_home="../../warpx_pmdk_test/warpx_problems_repo"
 script_dir="`dirname $0`"
 
 
-CPU_NODE="2-3"
+CPU_NODE="any"
 FAST_NODE="0-1"
 SLOW_NODE="2-3"
 MPI_RANKS="6"
