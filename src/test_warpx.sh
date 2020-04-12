@@ -3,8 +3,8 @@
 
 
 result_home="evaluation_nimble"
-warpx_exe="../warpx_pmdk_test/warpx_build/warpx_3d"
-problem_home="../warpx_pmdk_test/warpx_problems_repo"
+warpx_exe="../../warpx_pmdk_test/warpx_build/warpx_3d"
+problem_home="../../warpx_pmdk_test/warpx_problems_repo"
 
 script_dir="`dirname $0`"
 
