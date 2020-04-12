@@ -190,12 +190,12 @@ handle_signal_ALRM() {
 
 	    if [ "$pid" != "" ];then
 
-            killall nimble_control 2>/dev/zero
+            #killall nimble_control 2>/dev/zero
 
             for i in "`seq $fastnode_num`";do
                 fastnode="`echo $FAST_NODE|cut -d- -f$i`"
                 slownode="`echo $SLOW_NODE|cut -d- -f$i`"
-		        $PROG_HOME/nimble_control --pid=$pid --managed-pages=$MAX_MANAGED_PAGES --fast-mem-node=$fastnode --slow-mem-node=$slownode $NIMBLE_CONTROL_OPTIONS &
+		        $PROG_HOME/nimble_control --pid=$pid --managed-pages=$MAX_MANAGED_PAGES --fast-mem-node=$fastnode --slow-mem-node=$slownode $NIMBLE_CONTROL_OPTIONS 
             done
 
 		    #echo "Page migration start ..."
