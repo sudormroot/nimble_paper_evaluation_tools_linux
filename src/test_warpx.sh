@@ -20,7 +20,9 @@ MIGRATION_INTERVAL="1"
 MAX_MANAGED_SIZE_MB="512"
 
 test_problem(){
-	problem="$1"
+	FAST_MEM_SIZE="$1"
+	problem="$2"
+
 	problem_base="`basename $problem`"
 	appout_dir="$result_home/$problem_base"
 	appout="$appout_dir/appout.txt"
@@ -41,4 +43,4 @@ test_problem(){
 }
 
 
-test_problem $problem_home/1_species/laser_3d_512x512x4096_1_species 
+test_problem 128 $problem_home/1_species/laser_3d_512x512x4096_1_species 
