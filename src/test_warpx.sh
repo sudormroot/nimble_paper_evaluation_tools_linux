@@ -19,7 +19,15 @@ MIGRATION_THREADS="3"
 MIGRATION_INTERVAL="1"
 MAX_MANAGED_SIZE_MB="512"
 
-$script_dir/launch_warpx.sh --cpu-node=$CPU_NODE \
+test_problem(){
+	problem="$1"
+	appout_dir="$result_home/$problem"
+	appout="$appout_dir/appout.txt"
+
+	rm -rf $appout_dir 2>/dev/zero
+	mkdir $appout_dir 2>/dev/zero
+
+	$script_dir/launch_warpx.sh --cpu-node=$CPU_NODE \
                             --fast-node=$FAST_NODE \
                             --slow-node=$SLOW_NODE \
                             --mpi-ranks-num=$MPI_RANKS \
@@ -28,6 +36,8 @@ $script_dir/launch_warpx.sh --cpu-node=$CPU_NODE \
                             --migration-threads-num=$MIGRATION_THREADS \
                             --migration-interval=$MIGRATION_INTERVAL \
                             --managed-size=$MAX_MANAGED_SIZE_MB \
-                            $warpx_exe $problem_home/
+                            $warpx_exe $problem | tee $appout
+}
 
 
+test_problem $problem_home/1_species/laser_3d_512x512x4096_1_species 
