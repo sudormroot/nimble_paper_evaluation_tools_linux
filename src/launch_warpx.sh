@@ -299,7 +299,7 @@ echo "Set /sys/fs/cgroup/$CGROUP/cgroup.procs to $pid"
 
 problem_name="`basename $WARPX_PROBLEM`"
 
-OMP_NUM_THREADS=$OMP_THREADS mpirun -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=$CPU_NODE --slow-mem-node=$SLOW_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM &
+OMP_NUM_THREADS=$OMP_THREADS mpirun --allow-run-as-root -np $MPI_RANKS $PROG_HOME/numa_launch --cpu-node=$CPU_NODE --slow-mem-node=$SLOW_NODE --fast-mem-node=$FAST_NODE -- $WARPX_EXE $WARPX_PROBLEM &
 
 #stdbuf -oL $APP_CMD 2>&1 | tee -a results_nimble/appoutput.txt &
 

@@ -1,4 +1,17 @@
 
+
+Set the kernel boot options:
+https://normal.zone/blog/2019-01-27-nimble-page-management/
+
+
+To launch benchmarks for end-to-end results, you will need the scripts and the launcher from end_to_end_launcher folder. Also you need to enable cgroup v2 support by adding systemd.unified_cgroup_hierarchy=1 to your kernel boot parameters. What I did is adding systemd.unified_cgroup_hierarchy=1 to GRUB_CMDLINE_LINUX in /etc/default/grub file, like GRUB_CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1" and run sudo update_grub2.
+
+Note: You also need to disable Linux Auto NUMA balancing to avoid its interference either temporarily by executing sudo sysctl kernel.numa_balancing=0 or permenantly by adding kernel.numa_balancing=0 to /etc/sysctl.conf.1
+
+Confirm:
+mkdir /sys/fs/cgroup/test  should work
+
+
 1. Summary
 
 This tool set is used for evaulating Linux Nimble memory migration algorithm, the author's webpage is on:
