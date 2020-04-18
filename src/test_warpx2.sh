@@ -47,6 +47,6 @@ test_problem(){
 # fastmemsize is 12.8% of footprint
 
 
-test_problem 60020 $problem_home/3_species/laser_3d_512x512x4096_3_species
+#test_problem 60020 $problem_home/3_species/laser_3d_512x512x4096_3_species
 test_problem 40734 $problem_home/5_species/beam_3d_boost_512x512x4096_5_species
 
